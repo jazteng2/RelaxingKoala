@@ -1,9 +1,14 @@
 using MySqlConnector;
+using RelaxingKoala.Data;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddMySqlDataSource(builder.Configuration.GetConnectionString("Default")!);
+
+// Repository Services
+builder.Services.AddSingleton<IOrderRepository, OrderRepository>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -24,5 +29,9 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.MapControllerRoute(
+    name: "staff",
+    pattern: "{controller=Staff}/{action=Index}/{id?}");
 
 app.Run();
