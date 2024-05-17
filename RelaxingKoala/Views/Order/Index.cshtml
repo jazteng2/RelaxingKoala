@@ -1,0 +1,30 @@
+﻿@model IEnumerable<RelaxingKoala.Models.OrderModel>
+
+<h2>Orders</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Order Type</th>
+            <th>Customer Name</th>
+            <th>Customer Email</th>
+            <th>Menu Items</th>
+            <th>Total Cost</th>
+            <th>Order Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var order in Model)
+        {
+            <tr>
+                <td>@order.OrderType</td>
+                <td>@order.CustomerName</td>
+                <td>@order.CustomerEmail</td>
+                <td>@string.Join(", ", order.MenuItems)</td>
+                <td>@order.TotalCost</td>
+                <td>@order.OrderDate.ToShortDateString()</td>
+            </tr>
+        }
+    </tbody>
+</table>
+

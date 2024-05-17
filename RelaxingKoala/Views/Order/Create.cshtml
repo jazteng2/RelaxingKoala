@@ -1,0 +1,31 @@
+﻿@model RelaxingKoala.Models.OrderModel
+
+<h2>Create Order</h2>
+
+<form asp-action="Create" method="post">
+    <div class="form-group">
+        <label asp-for="OrderType"></label>
+        <input asp-for="OrderType" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="CustomerName"></label>
+        <input asp-for="CustomerName" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="CustomerEmail"></label>
+        <input asp-for="CustomerEmail" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="MenuItems"></label>
+        <input asp-for="MenuItems" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="TotalCost"></label>
+        <input asp-for="TotalCost" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="OrderDate"></label>
+        <input asp-for="OrderDate" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
