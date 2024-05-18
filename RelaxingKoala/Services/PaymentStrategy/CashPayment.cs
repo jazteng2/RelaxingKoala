@@ -1,12 +1,13 @@
-﻿using RelaxingKoala.Models.Orders;
+﻿using RelaxingKoala.Models;
+using RelaxingKoala.Models.Orders;
 
 namespace RelaxingKoala.Services.PaymentStrategy
 {
     public class CashPayment : IPaymentMethod
     {
-        public bool ProcessOrder()
+        public Invoice ProcessPayment()
         {
-            return true;
+            return null;
         }
     }
 }

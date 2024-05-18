@@ -11,12 +11,12 @@ namespace RelaxingKoala.Services
 
         public List<MenuItem> GetMenuItems()
         {
-
+            return null;
         }
 
         public List<MenuItem> GetAvailableMenuItems()
         {
-
+            return null;
         }
     }
 }
