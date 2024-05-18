@@ -44,5 +44,10 @@ namespace RelaxingKoala.Data
             command.Parameters.AddWithValue("@id", order.Id);
             command.ExecuteNonQuery();
         }
+
+        public string Test()
+        {
+            return "testing the test";
+        }
     }
 }
