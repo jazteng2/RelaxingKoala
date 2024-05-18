@@ -4,8 +4,6 @@ namespace RelaxingKoala.Models.Orders
 {
     public class DeliveryOrder : Order
     {
-        private int deliveryCost = 2;
-        private int serviceCost = 2;
         public DeliveryOrder(Guid id, Customer customer) : base(id, customer)
         {
 

@@ -5,11 +5,11 @@ namespace RelaxingKoala.Models
 {
     public class Invoice
     {
-        private int _id;
+        private Guid _id;
         private Order _order;
         private int _amountPayed;
         private int _change;
-        public Invoice(int id, Order order, int amountPayed)
+        public Invoice(Guid id, Order order, int amountPayed)
         {
             _id = id;
             _order = order;
@@ -18,7 +18,7 @@ namespace RelaxingKoala.Models
         }
 
         // properties
-        public int Id {  get { return _id; } }
+        public Guid Id {  get { return _id; } }
         public Order Order { get { return _order; } }
         public int AmountPayed { get { return _amountPayed; } }
         public int Change { get { return _change; } }
