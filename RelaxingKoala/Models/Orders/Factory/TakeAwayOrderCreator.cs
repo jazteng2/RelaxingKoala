@@ -5,9 +5,9 @@ namespace RelaxingKoala.Models.Orders.Factory
     public class TakeAwayOrderCreator : OrderCreator
     {
         public TakeAwayOrderCreator() { }
-        public override IOrder CreateOrder(Guid id, Customer customer)
+        public override IOrder CreateOrder()
         {
-            return new TakeAwayOrder(id, customer);
+            return new TakeAwayOrder();
         }
     }
 }

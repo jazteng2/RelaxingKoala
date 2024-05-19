@@ -5,11 +5,6 @@ namespace RelaxingKoala.Models.Orders
 {
     public class TakeAwayOrder : Order
     {
-        public TakeAwayOrder(Guid id, Customer customer) : base(id, customer)
-        {
-
-        }
-
         public override Invoice Pay(IPaymentMethod method)
         {
             PaymentContext context = new PaymentContext();

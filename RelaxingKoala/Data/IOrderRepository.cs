@@ -5,7 +5,7 @@ namespace RelaxingKoala.Data
     public interface IOrderRepository
     {
         public void CreateOrder(IOrder order);
-        public IOrder ReadOrder(Guid id);
+        public DeliveryOrder? GetDeliveryOrder(Guid id);
         public void UpdateOrder(IOrder order);
         public void DeleteOrder(IOrder order);
 

@@ -5,9 +5,9 @@ namespace RelaxingKoala.Models.Orders.Factory
     public class DineInOrderCreator : OrderCreator
     {
         public DineInOrderCreator() { }
-        public override IOrder CreateOrder(Guid id, Customer customer)
+        public override IOrder CreateOrder()
         {
-            return new DineInOrder(id, customer);
+            return new DineInOrder();
         }
     }
 }

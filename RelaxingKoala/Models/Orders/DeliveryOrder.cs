@@ -4,11 +4,7 @@ namespace RelaxingKoala.Models.Orders
 {
     public class DeliveryOrder : Order
     {
-        public DeliveryOrder(Guid id, Customer customer) : base(id, customer)
-        {
-
-        }
-
+        public DeliveryOrder() { }
         public override Invoice Pay(IPaymentMethod method)
         {
             PaymentContext context = new PaymentContext();

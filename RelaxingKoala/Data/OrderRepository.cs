@@ -1,5 +1,6 @@
 ﻿using MySqlConnector;
 using RelaxingKoala.Models.Orders;
+using RelaxingKoala.Models.Orders.Factory;
 
 namespace RelaxingKoala.Data
 {
@@ -19,14 +20,30 @@ namespace RelaxingKoala.Data
             command.Parameters.AddWithValue("order", order);    
             command.ExecuteNonQuery();
         }
-        public IOrder ReadOrder(Guid id)
+        public DeliveryOrder? GetDeliveryOrder(Guid id)
         {
             using var conn = _dataSource.OpenConnection();
             using var command = conn.CreateCommand();
             command.CommandText = @"SELECT * FROM order WHERE orderId = @id";
             command.Parameters.AddWithValue("@id", id);
-            var result = command.ExecuteReader().Read();
-            return null;
+            var reader = command.ExecuteReader();
+            if (reader.HasRows)
+            {
+                while (reader.Read())
+                {
+                    return new DeliveryOrder()
+                    {
+                        Id = reader.GetGuid(0),
+                        Cost = reader.GetInt32(1),
+                        State = (OrderState)Enum.Parse(typeof(OrderState), reader.GetString(2)),
+                        CustomerId = reader.GetGuid(3)
+                    };
+                }
+            }
+            else
+            {
+                return null;
+            }
         }
         public void UpdateOrder(IOrder order)
         {

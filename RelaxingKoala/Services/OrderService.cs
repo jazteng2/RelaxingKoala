@@ -16,7 +16,7 @@ namespace RelaxingKoala.Services
         {
             OrderCreator _orderCreator = new DeliveryOrderCreator();
             Guid id = Guid.NewGuid();
-            IOrder order = _orderCreator.CreateOrder(id, customer);
+            IOrder order = _orderCreator.CreateOrder();
             _orderRepository.CreateOrder(order);
             return order;
         }
@@ -24,7 +24,7 @@ namespace RelaxingKoala.Services
         {
             OrderCreator _orderCreator = new DeliveryOrderCreator();
             Guid id = Guid.NewGuid();
-            IOrder order = _orderCreator.CreateOrder(id, customer);
+            IOrder order = _orderCreator.CreateOrder();
             _orderRepository.CreateOrder(order);
             return order;
         }
@@ -32,7 +32,7 @@ namespace RelaxingKoala.Services
         {
             OrderCreator _orderCreator = new DeliveryOrderCreator();
             Guid id = Guid.NewGuid();
-            IOrder order = _orderCreator.CreateOrder(id, customer);
+            IOrder order = _orderCreator.CreateOrder();
             _orderRepository.CreateOrder(order);
             return order;
         }

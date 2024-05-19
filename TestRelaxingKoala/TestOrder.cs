@@ -19,10 +19,5 @@ namespace TestRelaxingKoala
         {
             Assert.Equal("testing the test", repository.Test());
         }
-        [Fact]
-        public void TestCreateOrderDatabase()
-        {
-            IOrder order = new DineInOrder(new Guid(), new Customer(new Guid(), "jared", "jared@gmail.com"))
-        }
     }
 }
