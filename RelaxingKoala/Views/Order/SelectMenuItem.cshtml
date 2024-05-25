@@ -1,0 +1,43 @@
+﻿@model RelaxingKoala.Models.OrderModel
+@{
+    ViewBag.Title = "Select Menu Items";
+    ViewBag.MenuItems = new List<string> { "Pizza - $10", "Salad - $5", "Burger - $8" };
+}
+
+<h2>Step 3: Select Menu Items</h2>
+
+@if (ViewBag.MenuItems == null)
+{
+    <p>No menu items available.</p>
+}
+else
+{
+    <form asp-action="SelectMenuItemsStep3" method="post">
+        <div class="form-group">
+            <label>Select Menu Items:</label>
+            @foreach (var item in (ViewBag.MenuItems as List<string> ?? new List<string>()))
+            {
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="selectedItems" value="@item" data-price="@item.Split('-')[1].Trim().Trim('$')" onchange="calculateTotal()" />
+                    <label class="form-check-label">@item</label>
+                </div>
+            }
+        </div>
+        <div class="form-group">
+            <label>Total Cost: $<span id="totalCost">0</span></label>
+        </div>
+        <button type="submit" class="btn btn-primary">Next</button>
+    </form>
+}
+
+@section Scripts {
+    <script>
+        function calculateTotal() {
+            let total = 0;
+            document.querySelectorAll('input[name="selectedItems"]:checked').forEach(function (checkbox) {
+                total += parseFloat(checkbox.getAttribute('data-price'));
+            });
+            document.getElementById('totalCost').innerText = total.toFixed(2);
+        }
+    </script>
+}

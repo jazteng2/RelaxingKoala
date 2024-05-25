@@ -1,0 +1,13 @@
+﻿@model RelaxingKoala.Models.OrderModel
+
+<h2>Step 4: Order Summary</h2>
+
+<p><strong>Customer Name:</strong> @Model.CustomerName</p>
+<p><strong>Contact Number:</strong> @Model.ContactNumber</p>
+<p><strong>Order Type:</strong> @Model.OrderType</p>
+<p><strong>Menu Items:</strong> @string.Join(", ", Model.MenuItems)</p>
+<p><strong>Total Cost:</strong> $@Model.TotalCost</p>
+
+<form asp-action="SubmitOrder" method="post">
+    <button type="submit" class="btn btn-primary">Submit Order</button>
+</form>
