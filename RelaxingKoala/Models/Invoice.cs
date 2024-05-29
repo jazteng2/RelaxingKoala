@@ -9,12 +9,5 @@ namespace RelaxingKoala.Models
         public int AmountPayed { get; set; }
         public int Change { get; set; }
         public Guid OrderId { get; set; }
-        public required Order Order { get; set; }
-
-        // Methods
-        public int CalculateChange ()
-        {
-            return Order.Cost - AmountPayed;
-        }
     }
 }

@@ -7,19 +7,20 @@ namespace RelaxingKoala.Models.Orders
     {
         public Guid Id { get; set; }
         public int Cost { get; set; }
+        public Guid UserId { get; set; }
         public OrderState State { get; set; }
-
-        // Relationships
-        public Guid CustomerId { get; set; }
+        public OrderType Type { get; set; }
         public List<Table> Tables { get; set; } = new List<Table>();
         public List<MenuItem> MenuItems { get; set; } = new List<MenuItem>();
-
-        // Methods
+        
         public abstract Invoice Pay(IPaymentMethod method);
-        public void AddItem(MenuItem item)
+        public void RecalculateCost()
         {
-            MenuItems.Add(item);
-            Cost += item.Cost;
+            Cost = 0;
+            foreach (var item in MenuItems)
+            {
+                Cost += item.Cost;
+            }
         }
     }
 }

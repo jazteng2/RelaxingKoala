@@ -6,9 +6,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddMySqlDataSource(builder.Configuration.GetConnectionString("Default")!);
 
-// Repository Services
-builder.Services.AddSingleton<IOrderRepository, OrderRepository>();
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

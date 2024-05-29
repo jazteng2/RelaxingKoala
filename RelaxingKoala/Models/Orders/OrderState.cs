@@ -2,10 +2,10 @@
 {
     public enum OrderState
     {
-        onhold,
-        payed,
-        confirmed,
-        preparing,
-        ready
+        Onhold,
+        Payed,
+        Confirmed,
+        Preparing,
+        Ready
     }
 }
