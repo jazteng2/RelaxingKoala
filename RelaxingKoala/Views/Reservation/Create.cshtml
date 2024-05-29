@@ -1,0 +1,34 @@
+﻿//Reservations/Create.cshtml
+@model RelaxingKoala.Models.Reservation
+
+<h2>Make a Reservation</h2>
+
+<form asp-action="Create" method="post">
+    <div class="form-group">
+        <label asp-for="ReservedDate" class="control-label"></label>
+        <input asp-for="ReservedDate" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="StartTime" class="control-label"></label>
+        <input asp-for="StartTime" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="EndTime" class="control-label"></label>
+        <input asp-for="EndTime" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="NumberOfPeople" class="control-label"></label>
+        <input asp-for="NumberOfPeople" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="UserId" class="control-label"></label>
+        <input asp-for="UserId" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Tables" class="control-label"></label>
+        <input asp-for="Tables" class="form-control" />
+    </div>
+    <div class="form-group">
+        <input type="submit" value="Create" class="btn btn-primary" />
+    </div>
+</form>
