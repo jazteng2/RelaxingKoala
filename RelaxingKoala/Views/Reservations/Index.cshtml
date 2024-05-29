@@ -18,9 +18,9 @@
         </tr>
     </thead>
     <tbody>
-        @if (ViewBag.Reservations != null && ViewBag.Reservations.Count > 0)
+        @if (Model != null && Model.Any())
         {
-            foreach (var reservation in ViewBag.Reservations)
+            foreach (var reservation in Model)
             {
                 <tr>
                     <td>@reservation.CreatedDate</td>
@@ -28,6 +28,9 @@
                     <td>@reservation.StartTime</td>
                     <td>@reservation.EndTime</td>
                     <td>@reservation.NumberOfPeople</td>
+                    <td>
+                        <a href="@Url.Action("Delete", new { id = reservation.Id })">Delete</a>
+                    </td>
                 </tr>
             }
         }

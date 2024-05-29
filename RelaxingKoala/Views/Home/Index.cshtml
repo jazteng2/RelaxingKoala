@@ -3,6 +3,58 @@
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h1 class="display-4">Welcome to Relaxing Koala Restaurant</h1>
+    <p class="lead">Experience the best dining with a relaxing ambiance</p>
+    <hr class="my-4" />
+    <p>Our restaurant offers a wide variety of delicious dishes, comfortable seating, and excellent customer service. Explore our menu, make reservations, and enjoy special offers!</p>
+    <a class="btn btn-primary btn-lg" asp-area="" asp-controller="Reservations" asp-action="Create">Make a Reservation</a>
+    <a class="btn btn-secondary btn-lg" asp-area="" asp-controller="Menu" asp-action="Index">View Menu</a>
+    <a class="btn btn-secondary btn-lg" asp-area="" asp-controller="" asp-action="">Make an Order</a>
+
+</div>
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-4">
+            <h2>About Us</h2>
+            <p>Relaxing Koala Restaurant is dedicated to providing a unique dining experience with a focus on relaxation and quality. Our chefs use the freshest ingredients to create mouth-watering dishes that you will love.</p>
+        </div>
+        <div class="col-md-4">
+            <h2>Menu</h2>
+            <p>Check out our Menu. Enjoy discounts, combo deals, and exclusive offers available only at Relaxing Koala Restaurant. <a asp-area="" asp-controller="Offers" asp-action="Index">Learn more</a></p>
+        </div>
+        <div class="col-md-4">
+            <h2>Contact Us</h2>
+            <p>We would love to hear from you. Reach out to us for any inquiries, feedback, or reservations. You can contact us via phone, email, or visit our restaurant. <a asp-area="" asp-controller="Contact" asp-action="Index">Contact us</a></p>
+        </div>
+    </div>
+    @if (TempData["UserRole"] != null)
+    {
+        var role = TempData["UserRole"].ToString();
+        if ( role == "Driver" || role == "Admin")
+        {
+            <div class="row mt-4">
+                Hello @role!
+
+                <div class="col-md-12 text-center">
+                    <a class="btn btn-warning btn-lg" asp-area="" asp-controller="Reservations" asp-action="Index">Manage Reservations</a>
+                    <a class="btn btn-warning btn-lg" asp-area="" asp-controller="" asp-action="">Manage Orders</a>
+
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="row mt-4">
+                Hello @role!
+
+                <div class="col-md-12 text-center">
+                    <a class="btn btn-warning btn-lg" asp-area="" asp-controller="Reservations" asp-action="Index">Manage Reservations</a>
+                    <a class="btn btn-warning btn-lg" asp-area="" asp-controller="" asp-action="">Manage Orders</a>
+
+                </div>
+            </div>
+            
+        }
+    }
 </div>

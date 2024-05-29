@@ -1,42 +1,50 @@
 ﻿using MySqlConnector;
 using RelaxingKoala.Models.Users;
+using System;
 
 namespace RelaxingKoala.Data
 {
     public class UserRepository
     {
-        private readonly MySqlDataSource _dataSource;
-        public UserRepository(MySqlDataSource dataSource)
+        private readonly string _connectionString;
+
+        public UserRepository(string connectionString)
         {
-            _dataSource = dataSource;
+            _connectionString = connectionString;
         }
 
         public User GetByEmail(string email)
         {
-            using var conn = _dataSource.OpenConnection();
+            using var conn = new MySqlConnection(_connectionString);
+            conn.Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = @"SELECT * FROM user WHERE email = @email";
-            cmd.Parameters.AddWithValue("email", email);
+            cmd.CommandText = @"SELECT * FROM user WHERE email = @Email";
+            cmd.Parameters.AddWithValue("@Email", email);
             var reader = cmd.ExecuteReader();
             if (reader.Read())
             {
-                var name = reader.GetString("firstName");
-                var role = reader.GetInt32("userRoleId");
-                if (role == (int) UserRole.Customer)
+                var roleString = reader.GetString("userRoleId");
+                int role = int.Parse(roleString);
+
+                // Add logging to debug the roles
+                Console.WriteLine($"Email: {email}, Role ID: {role}, Role: {(UserRole)role}");
+
+                if (role == (int)UserRole.Customer)
                 {
                     return new Customer()
                     {
-                        Id = reader.GetGuid("Id"),
+                        Id = reader.GetGuid("id"),
                         FirstName = reader.GetString("firstName"),
                         LastName = reader.GetString("lastName"),
                         Email = reader.GetString("email"),
                         Password = reader.GetString("password")
                     };
-                } else if (role == (int) UserRole.Staff)
+                }
+                else if (role == (int)UserRole.Staff)
                 {
                     return new Staff()
                     {
-                        Id = reader.GetGuid("Id"),
+                        Id = reader.GetGuid("id"),
                         FirstName = reader.GetString("firstName"),
                         LastName = reader.GetString("lastName"),
                         Email = reader.GetString("email"),
@@ -44,7 +52,7 @@ namespace RelaxingKoala.Data
                     };
                 }
             }
-            return new Customer();
+            return null;
         }
     }
 }

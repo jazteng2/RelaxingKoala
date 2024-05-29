@@ -18,12 +18,18 @@ namespace RelaxingKoala.Controllers
             _tableRepository = new TableRepository(dataSource); 
         }
 
-        public IActionResult Index(Guid id)
+        public IActionResult Index(Guid? id)
         {
-            
-            var reservations = _reservationRepository.GetByUserId(id);
-            ViewBag.Reservations = reservations;
-            return View();
+            List<Reservation> reservations;
+            if (id.HasValue)
+            {
+                reservations = _reservationRepository.GetByUserId(id.Value);
+            }
+            else
+            {
+                reservations = _reservationRepository.GetAll();
+            }
+            return View(reservations);
         }
 
         public IActionResult Create()
@@ -41,7 +47,6 @@ namespace RelaxingKoala.Controllers
                 reservation.Id = Guid.NewGuid();
                 reservation.CreatedDate = DateOnly.FromDateTime(DateTime.Now);
                 _reservationRepository.Insert(reservation);
-
                 return RedirectToAction(nameof(Index), new { id = reservation.UserId });
             }
             ViewBag.Tables = _reservationRepository.GetAvailableTables(); // Ensure ViewBag is set on postback
