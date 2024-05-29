@@ -1,24 +1,26 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RelaxingKoala.Data;
 using RelaxingKoala.Models;
+using System;
 using System.Threading.Tasks;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using MySqlConnector;
 
 namespace RelaxingKoala.Controllers
 {
     public class ReservationsController : Controller
     {
-        private readonly RestaurantDbContext _context;
+        private readonly ReservationRepository _reservationRepository;
 
-        public ReservationsController(RestaurantDbContext context)
+        public ReservationsController(MySqlDataSource dataSource)
         {
-            _context = context;
+            _reservationRepository = new ReservationRepository(dataSource);
         }
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            var reservations = await _context.Reservations.Include(r => r.User).ToListAsync();
+            var reservations = _reservationRepository.GetAll();
             return View(reservations);
         }
 
@@ -29,26 +31,25 @@ namespace RelaxingKoala.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,CreatedDate,ReservedDate,StartTime,EndTime,NumberOfPeople,UserId,Tables")] Reservation reservation)
+        public IActionResult Create([Bind("Id,CreatedDate,ReservedDate,StartTime,EndTime,NumberOfPeople,UserId,Tables")] Reservation reservation)
         {
             if (ModelState.IsValid)
             {
                 reservation.Id = Guid.NewGuid();
-                _context.Add(reservation);
-                await _context.SaveChangesAsync();
+                _reservationRepository.Insert(reservation);
                 return RedirectToAction(nameof(Index));
             }
             return View(reservation);
         }
 
-        public async Task<IActionResult> Edit(Guid? id)
+        public IActionResult Edit(Guid? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var reservation = await _context.Reservations.FindAsync(id);
+            var reservation = _reservationRepository.GetById(id.Value);
             if (reservation == null)
             {
                 return NotFound();
@@ -58,7 +59,7 @@ namespace RelaxingKoala.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("Id,CreatedDate,ReservedDate,StartTime,EndTime,NumberOfPeople,UserId,Tables")] Reservation reservation)
+        public IActionResult Edit(Guid id, [Bind("Id,CreatedDate,ReservedDate,StartTime,EndTime,NumberOfPeople,UserId,Tables")] Reservation reservation)
         {
             if (id != reservation.Id)
             {
@@ -69,12 +70,11 @@ namespace RelaxingKoala.Controllers
             {
                 try
                 {
-                    _context.Update(reservation);
-                    await _context.SaveChangesAsync();
+                    _reservationRepository.Update(reservation); // Implement Update method in ReservationRepository if necessary
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ReservationExists(reservation.Id))
+                    if (!_reservationRepository.Exists(reservation.Id))
                     {
                         return NotFound();
                     }
@@ -88,16 +88,14 @@ namespace RelaxingKoala.Controllers
             return View(reservation);
         }
 
-        public async Task<IActionResult> Delete(Guid? id)
+        public IActionResult Delete(Guid? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var reservation = await _context.Reservations
-                .Include(r => r.User)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var reservation = _reservationRepository.GetById(id.Value);
             if (reservation == null)
             {
                 return NotFound();
@@ -108,17 +106,15 @@ namespace RelaxingKoala.Controllers
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(Guid id)
+        public IActionResult DeleteConfirmed(Guid id)
         {
-            var reservation = await _context.Reservations.FindAsync(id);
-            _context.Reservations.Remove(reservation);
-            await _context.SaveChangesAsync();
+            _reservationRepository.Delete(id);
             return RedirectToAction(nameof(Index));
         }
 
         private bool ReservationExists(Guid id)
         {
-            return _context.Reservations.Any(e => e.Id == id);
+            return _reservationRepository.Exists(id); // Implement Exists method in ReservationRepository if necessary
         }
     }
 }

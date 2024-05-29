@@ -116,6 +116,25 @@ namespace RelaxingKoala.Data
 
             return list;
         }
+        public List<Table> GetAvailableTables()
+        {
+            List<Table> tables = new List<Table>();
+            using var conn = _dataSource.OpenConnection();
+            using var command = conn.CreateCommand();
+            command.CommandText = @"SELECT id, tableNumber, availability FROM dineintable WHERE availability = TRUE";
+            var reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                tables.Add(new Table
+                {
+                    Id = reader.GetInt32("id"),
+                    Number = reader.GetInt32("tableNumber"),
+                    Availability = reader.GetBoolean("availability")
+                });
+            }
+            return tables;
+        }
+
 
         public void Insert(Reservation res)
         {
@@ -175,6 +194,62 @@ namespace RelaxingKoala.Data
             command2.ExecuteNonQuery();
             conn2.Close();
         }
-        
+
+        public void Update(Reservation reservation)
+        {
+            // Update reservation
+            using var conn = _dataSource.OpenConnection();
+            using var command = conn.CreateCommand();
+            command.CommandText = @"
+                UPDATE Reservation
+                SET createdDate = @createDate, reservedDate = @reservedDate, startTime = @startTime, endTime = @endTime, numberOfPeople = @numberOfPeople, userId = @userId
+                WHERE id = @id
+            ";
+            command.Parameters.AddWithValue("id", reservation.Id);
+            command.Parameters.AddWithValue("createDate", reservation.CreatedDate);
+            command.Parameters.AddWithValue("reservedDate", reservation.ReservedDate);
+            command.Parameters.AddWithValue("startTime", reservation.StartTime);
+            command.Parameters.AddWithValue("endTime", reservation.EndTime);
+            command.Parameters.AddWithValue("numberOfPeople", reservation.NumberOfPeople);
+            command.Parameters.AddWithValue("userId", reservation.UserId);
+            command.ExecuteNonQuery();
+            conn.Close();
+
+            // Update table reservation associations
+            using var conn2 = _dataSource.OpenConnection();
+            var tr = conn2.BeginTransaction();
+            using var command2 = conn2.CreateCommand();
+            command2.Transaction = tr;
+            command2.CommandText = @"DELETE FROM tablereservation WHERE reservationId = @id";
+            command2.Parameters.AddWithValue("id", reservation.Id);
+            command2.ExecuteNonQuery();
+
+            command2.CommandText = @"
+                INSERT INTO tablereservation (tableId, reservationId)
+                VALUES (@tbId, @rsId);
+            ";
+            foreach (var table in reservation.Tables)
+            {
+                command2.Parameters.Clear();
+                command2.Parameters.AddWithValue("tbId", table);
+                command2.Parameters.AddWithValue("rsId", reservation.Id);
+                command2.ExecuteNonQuery();
+            }
+
+            tr.Commit();
+            conn2.Close();
+        }
+
+        public bool Exists(Guid id)
+        {
+            using var conn = _dataSource.OpenConnection();
+            using var command = conn.CreateCommand();
+            command.CommandText = @"SELECT COUNT(*) FROM reservation WHERE id = @id";
+            command.Parameters.AddWithValue("id", id);
+            var count = Convert.ToInt32(command.ExecuteScalar());
+            return count > 0;
+        }
     }
+
 }
+
