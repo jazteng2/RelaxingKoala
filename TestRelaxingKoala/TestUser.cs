@@ -12,18 +12,21 @@ namespace TestRelaxingKoala
 {
     public class TestUser
     {
-        private readonly CustomerRepository repo;
+        private readonly CustomerRepository customerRepo;
+        private readonly UserRepository userRepo;
         private readonly ITestOutputHelper output;
         public TestUser(ITestOutputHelper output)
         {
-            repo = new CustomerRepository(new MySqlDataSource("Server=127.0.0.1;Port=3306;User ID=root;Password=admin;Database=rkdb"));
+            var conn = new MySqlDataSource("Server=127.0.0.1;Port=3306;User ID=root;Password=admin;Database=rkdb");
+            customerRepo = new CustomerRepository(conn);
+            userRepo = new UserRepository(conn);
             this.output = output;
         }
 
         [Fact]
         public void TestFetchCustomers()
         {
-            List<Customer> customers = repo.GetAll();
+            List<Customer> customers = customerRepo.GetAll();
             foreach(Customer customer in customers)
             {
                 output.WriteLine(@"
@@ -35,23 +38,30 @@ namespace TestRelaxingKoala
         [Fact]
         public void TestFetchCustomerById()
         {
-            Customer c = repo.GetById(new Guid("d840d48c-91b8-4a69-97b9-1b90a8ab3acf"));
+            Customer c = customerRepo.GetById(new Guid("d840d48c-91b8-4a69-97b9-1b90a8ab3acf"));
             Assert.NotNull(c);
         }
 
         [Fact]
         public void TestFetchCustomerByName()
         {
-            Customer c = repo.GetByFirstName("Emily");
+            Customer c = customerRepo.GetByFirstName("Emily");
             Assert.NotNull(c);
         }
 
         [Fact]
         public void TestFetchCustomerByEmail()
         {
-            Customer c = repo.GetByEmail("emily.davis@example.com");
+            Customer c = customerRepo.GetByEmail("emily.davis@example.com");
             Assert.NotNull(c);
 
+        }
+
+        [Fact]
+        public void TestFetchUserByEmail()
+        {
+            User u = userRepo.GetByEmail("emily.davis@example.com");
+            output.WriteLine(u.Id.ToString());
         }
     }
 }
