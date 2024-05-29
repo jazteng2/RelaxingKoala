@@ -1,44 +1,48 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using RelaxingKoala.Data;
-using RelaxingKoala.Models;
-using System;
-using System.Threading.Tasks;
-using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using MySqlConnector;
+using RelaxingKoala.Data;
+using RelaxingKoala.Models;
+using System.Runtime.InteropServices;
 
 namespace RelaxingKoala.Controllers
 {
     public class ReservationsController : Controller
     {
         private readonly ReservationRepository _reservationRepository;
+        private readonly TableRepository _tableRepository;
 
         public ReservationsController(MySqlDataSource dataSource)
         {
             _reservationRepository = new ReservationRepository(dataSource);
+            _tableRepository = new TableRepository(dataSource); 
         }
 
         public IActionResult Index()
         {
             var reservations = _reservationRepository.GetAll();
-            return View(reservations);
+            ViewBag.Reservations= reservations;
+            return View();
         }
 
         public IActionResult Create()
         {
+            ViewBag.Tables = _reservationRepository.GetAvailableTables();
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create([Bind("Id,CreatedDate,ReservedDate,StartTime,EndTime,NumberOfPeople,UserId,Tables")] Reservation reservation)
+        public IActionResult Create([Bind("ReservedDate,StartTime,EndTime,NumberOfPeople,UserId,Tables")] Reservation reservation)
         {
             if (ModelState.IsValid)
             {
                 reservation.Id = Guid.NewGuid();
+                reservation.CreatedDate = DateOnly.FromDateTime(DateTime.Now);
                 _reservationRepository.Insert(reservation);
                 return RedirectToAction(nameof(Index));
             }
+            ViewBag.Tables = _reservationRepository.GetAvailableTables(); // Ensure ViewBag is set on postback
             return View(reservation);
         }
 
