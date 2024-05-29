@@ -16,5 +16,10 @@ namespace RelaxingKoala.Models.Orders
 
         // Methods
         public abstract Invoice Pay(IPaymentMethod method);
+        public void AddItem(MenuItem item)
+        {
+            MenuItems.Add(item);
+            Cost += item.Cost;
+        }
     }
 }
