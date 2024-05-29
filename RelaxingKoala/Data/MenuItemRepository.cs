@@ -33,5 +33,17 @@ namespace RelaxingKoala.Data
             }
             return new List<MenuItem>();
         }
+
+        public void Update(MenuItem item)
+        {
+            using var conn = _dataSource.OpenConnection();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"UPDATE menuitem set cost = @cost, availability = @availability WHERE id = @id";
+            cmd.Parameters.AddWithValue("cost", item.Cost);
+            cmd.Parameters.AddWithValue("availability", item.Availability);
+            cmd.Parameters.AddWithValue("id", item.Id);
+            cmd.ExecuteNonQuery();
+            conn.Close();
+        }
     }
 }
