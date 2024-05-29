@@ -91,6 +91,57 @@ namespace RelaxingKoala.Data
             return reservation;
         }
 
+        public List<Reservation> GetByUserId(Guid id)
+        {
+            // reservation
+            using var conn = _dataSource.OpenConnection();
+            using var command = conn.CreateCommand();
+            command.CommandText = @"SELECT * FROM reservation WHERE userid = @id";
+            command.Parameters.AddWithValue("id", id);
+            var reader = command.ExecuteReader();
+            if (!reader.Read()) return new List<Reservation>();
+            
+            var list = new List<Reservation>();
+            while (reader.Read())
+            {
+                list.Add(new Reservation()
+                {
+                    Id = reader.GetGuid("id"),
+                    CreatedDate = DateOnly.FromDateTime(reader.GetDateTime("createdDate")),
+                    ReservedDate = DateOnly.FromDateTime(reader.GetDateTime("reservedDate")),
+                    StartTime = reader.GetTimeOnly("startTime"),
+                    EndTime = reader.GetTimeOnly("endTime"),
+                    NumberOfPeople = reader.GetInt32("numberofpeople"),
+                    UserId = reader.GetGuid("userId")
+                });
+            }
+            conn.Close();
+
+            // table reservation association
+            
+
+            foreach (Reservation reservation in list)
+            {
+                using var conn2 = _dataSource.OpenConnection();
+                using var cmd2 = conn2.CreateCommand();
+                cmd2.Parameters.Clear();
+                cmd2.CommandText = @"SELECT t.id
+                                    FROM dineintable t
+                                    JOIN tablereservation rt ON t.id = rt.tableId
+                                    WHERE rt.reservationId = @id";
+
+                cmd2.Parameters.AddWithValue("id", reservation.Id);
+                var reader2 = cmd2.ExecuteReader();
+                while (reader2.Read())
+                {
+                    reservation.Tables.Add(reader2.GetInt32("id"));
+                }
+                conn2.Close();
+            }
+            
+            return list;
+        }
+
         public List<Table> GetReservedTables(Guid id)
         {
             List<Table> list = new List<Table>();

@@ -1,0 +1,43 @@
+﻿@model IEnumerable<RelaxingKoala.Models.Reservation>
+
+@{
+    ViewData["Title"] = "Manage Reservations";
+}
+
+<h2>Manage Reservations</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Created Date</th>
+            <th>Reserved Date</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+            <th>Number of People</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (ViewBag.Reservations != null && ViewBag.Reservations.Count > 0)
+        {
+            foreach (var reservation in ViewBag.Reservations)
+            {
+                <tr>
+                    <td>@reservation.CreatedDate</td>
+                    <td>@reservation.ReservedDate</td>
+                    <td>@reservation.StartTime</td>
+                    <td>@reservation.EndTime</td>
+                    <td>@reservation.NumberOfPeople</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="7">No reservations found.</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-action="Create">Create New Reservation</a>

@@ -65,6 +65,24 @@ namespace TestRelaxingKoala
         }
 
         [Fact]
+        public void TestGetReservationByUserId()
+        {
+            string id = "d840d48c-91b8-4a69-97b9-1b90a8ab3acf";
+            List<Reservation> list = repo.GetByUserId(new Guid(id));
+            foreach (var r in list)
+            {
+                output.WriteLine(@"
+                    {0}, {1}, {2}, {3}, {4}, {5}
+                ", r.Id, r.CreatedDate, r.ReservedDate, r.StartTime, r.EndTime, r.NumberOfPeople, r.Tables.Count);
+
+                foreach (var t in r.Tables)
+                {
+                    output.WriteLine(t.ToString());
+                }
+            }
+        }
+
+        [Fact]
         public void TestInsertReservation()
         {
             var reservation = new Reservation()
