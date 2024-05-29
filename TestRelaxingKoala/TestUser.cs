@@ -1,11 +1,6 @@
 ﻿using MySqlConnector;
 using RelaxingKoala.Data;
 using RelaxingKoala.Models.Users;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit.Abstractions;
 
 namespace TestRelaxingKoala
@@ -46,7 +41,7 @@ namespace TestRelaxingKoala
         public void TestFetchCustomerByName()
         {
             Customer c = customerRepo.GetByFirstName("Emily");
-            Assert.NotNull(c);
+            Assert.Equal("Emily", c.FirstName);
         }
 
         [Fact]
@@ -62,6 +57,13 @@ namespace TestRelaxingKoala
         {
             User u = userRepo.GetByEmail("emily.davis@example.com");
             output.WriteLine(u.Id.ToString());
+        }
+
+        [Fact]
+        public void TestFetchUserByEmailFail()
+        {
+            User u = userRepo.GetByEmail("");
+            Assert.True(string.IsNullOrEmpty(u.FirstName));
         }
     }
 }

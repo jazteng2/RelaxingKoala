@@ -8,11 +8,11 @@ namespace RelaxingKoala.Data
     public class CustomerRepository
     {
         private readonly MySqlDataSource _dataSource;
-        private readonly UserRole _role;
+        private readonly int _role;
         public CustomerRepository(MySqlDataSource dataSource)
         {
             _dataSource = dataSource;
-            _role = (int) UserRole.Customer;
+            _role = (int) UserRole.Customer + 1;
         }
         public List<Customer> GetAll()
         {

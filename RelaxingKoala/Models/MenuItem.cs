@@ -2,9 +2,8 @@
 {
     public class MenuItem
     {
-        public Guid Id { get; set; }
-        public required string Name { get; set; }
-        public required string Description { get; set; }
+        public int Id { get; set; }
         public int Cost { get; set; }
+        public string Name { get; set; } = string.Empty;
     }
 }
