@@ -21,14 +21,15 @@ namespace RelaxingKoala.Controllers
         public IActionResult Index(Guid? id)
         {
             List<Reservation> reservations;
+
+            // Id exist
             if (id.HasValue)
             {
                 reservations = _reservationRepository.GetByUserId(id.Value);
+                return View(reservations);
             }
-            else
-            {
-                reservations = _reservationRepository.GetAll();
-            }
+
+            reservations = _reservationRepository.GetAll();
             return View(reservations);
         }
 
