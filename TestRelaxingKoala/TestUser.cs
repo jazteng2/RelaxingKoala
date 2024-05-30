@@ -1,5 +1,6 @@
 ﻿using MySqlConnector;
 using RelaxingKoala.Data;
+using RelaxingKoala.Models.Orders;
 using RelaxingKoala.Models.Users;
 using Xunit.Abstractions;
 
@@ -9,12 +10,14 @@ namespace TestRelaxingKoala
     {
         private readonly CustomerRepository customerRepo;
         private readonly UserRepository userRepo;
+        private readonly OrderRepository orderRepo;
         private readonly ITestOutputHelper output;
         public TestUser(ITestOutputHelper output)
         {
             var conn = new MySqlDataSource("Server=127.0.0.1;Port=3306;User ID=root;Password=admin;Database=rkdb");
             customerRepo = new CustomerRepository(conn);
             userRepo = new UserRepository(conn);
+            orderRepo = new OrderRepository(conn);
             this.output = output;
         }
 
@@ -65,5 +68,7 @@ namespace TestRelaxingKoala
             User u = userRepo.GetByEmail("");
             Assert.True(string.IsNullOrEmpty(u.FirstName));
         }
+
+        
     }
 }

@@ -1,0 +1,129 @@
+﻿@model RelaxingKoala.Models.ViewModels.KitchenModel
+@using RelaxingKoala.Models
+@{
+    ViewData["Title"] = "Confirmed Orders";
+}
+
+<h1>Incoming Orders</h1>
+
+@* View Upcoming Orders *@
+<h2>Orders</h2>
+@* <table class="table">
+    <thead>
+        <tr>
+            <th>No</th>
+            <th>Type</th>
+            <th>Name</th>
+            <th>Availability</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model == null)
+        {
+            <h3>No Dishes to display</h3>
+        }
+        else
+        {
+            @for (int i = 0; i < Model.orders.Count(); i++)
+            {
+                var order = Model.orders[i];
+                <tr>
+                    <td>@menuitem.Id</td>
+                    <td>@menuitem.Name</td>
+                    <td>@menuitem.Cost</td>
+                    <td>
+                        <select name="select-availability-@menuitem.Id" id="select-availability-@menuitem.Id" onchange="handleSelectChange(@menuitem.Id, this)">
+                            @if (menuitem.Availability)
+                            {
+                                <option value="1" selected="selected"><a>Available</a></option>
+                                <option value="0"><a>Unavailable</a></option>
+                            }
+                            else
+                            {
+                                <option value="1"><a>Available</a></option>
+                                <option value="0" selected="selected"><a>Unavailable</a></option>
+                            }
+                        </select>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table> *@
+
+@* View Menu Items *@
+<h2>Menu Item</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Cost</th>
+            <th>Availability</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model == null)
+        {
+            <h3>No Dishes to display</h3>
+        } else
+        {
+            @foreach (MenuItem menuitem in Model.menuItems)
+            {
+                <tr>
+                    <td>@menuitem.Id</td>
+                    <td>@menuitem.Name</td>
+                    <td>@menuitem.Cost</td>
+                    <td>
+                        <select name="select-availability-@menuitem.Id" id="select-availability-@menuitem.Id" onchange="handleSelectChange(@menuitem.Id, this)">
+                            @if (menuitem.Availability)
+                            {
+                                <option value="1" selected="selected"><a>Available</a></option>
+                                <option value="0"><a>Unavailable</a></option>
+                            }
+                            else
+                            {
+                                <option value="1"><a>Available</a></option>
+                                <option value="0" selected="selected"><a>Unavailable</a></option>
+                            }
+                        </select>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        function handleSelectChange(menuitemId, selectedElement) {
+            const selectedValue = selectedElement.value;
+            console.log(menuitemId);
+            let available;
+            if (selectedValue == "1") {
+                available = 1;
+            } else if (selectedValue == "0") {
+                available = 0;
+            }
+
+            console.log(available);
+            $.ajax({
+                url: `/Kitchen/EditMenuItem`,
+                type: 'POST',
+                data: {
+                    id: menuitemId,
+                    availability: available
+                },
+                success: function (response) {
+                    alert('Update successful');
+                },
+                error: function () {
+                    alert('Update unsuccessful');
+                }
+            });
+        }
+    </script>
+}

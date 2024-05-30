@@ -106,9 +106,28 @@ namespace TestRelaxingKoala
             }    
         }
 
+        [Fact]
+        public void TestAssignUserToOrders()
+        {
+            var orders = orderRepo.GetAllByState(OrderState.Confirmed);
+            var updatedOrders = orderRepo.PopulateAssociations(orders);
+
+            foreach (var order in updatedOrders)
+            {
+                output.WriteLine("{0} {1} {2} {3} {4} {5}", order.Id, order.Cost, order.UserId, order.State, order.Type, order.User?.FirstName);
+                foreach (var table in order.Tables)
+                {
+                    output.WriteLine("{0} {1}", table.Id, table.Availability);
+                }
+                foreach (var item in order.MenuItems)
+                {
+                    output.WriteLine("{0} {1} {2}", item.Id, item.Name, item.Cost);
+                }
+            }
+        }
         private void DisplayOrder(IOrder order)
         {
-            output.WriteLine("{0} {1} {2} {3} {4}", order.Id, order.Cost, order.UserId, order.State, order.Type);
+            output.WriteLine("{0} {1} {2} {3} {4} {5}", order.Id, order.Cost, order.UserId, order.State, order.Type, order.User?.FirstName);
             foreach (var table in order.Tables)
             {
                 output.WriteLine("{0} {1}", table.Id, table.Availability);

@@ -1,6 +1,7 @@
 ﻿using MySqlConnector;
 using RelaxingKoala.Models;
 using RelaxingKoala.Models.Orders;
+using RelaxingKoala.Models.Users;
 using System.Security.Cryptography;
 
 namespace RelaxingKoala.Data
@@ -8,9 +9,16 @@ namespace RelaxingKoala.Data
     public class OrderRepository
     {
         private readonly MySqlDataSource _dataSource;
+        private readonly TableRepository tableRepo;
+        private readonly MenuItemRepository menuItemRepo;
+        private readonly UserRepository userRepo;
         public OrderRepository(MySqlDataSource dataSource)
         {
             _dataSource = dataSource;
+            tableRepo = new TableRepository(dataSource);
+            menuItemRepo = new MenuItemRepository(dataSource);
+            userRepo = new UserRepository(dataSource);
+
         }
 
         public IOrder GetById(Guid id)
@@ -215,6 +223,54 @@ namespace RelaxingKoala.Data
                 orders.Add(order);
             }
 
+            return orders;
+        }
+
+        public List<IOrder> PopulateAssociations(List<IOrder> orders)
+        {
+            using var conn = _dataSource.OpenConnection();
+
+            // Get associated users
+            foreach (var o in orders)
+            {
+                using var cmd = conn.CreateCommand();
+                cmd.CommandText = @"SELECT * FROM user WHERE id = @id";
+                cmd.Parameters.AddWithValue("id", o.UserId);
+                using var reader = cmd.ExecuteReader();
+                reader.Read();
+                var role = reader.GetInt32("userRoleId");
+                switch (role)
+                {
+                    case (int)UserRole.Customer + 1:
+                        o.User = new Customer()
+                        {
+                            Id = reader.GetGuid("id"),
+                            FirstName = reader.GetString("firstName"),
+                            LastName = reader.GetString("lastName"),
+                            Email = reader.GetString("email"),
+                            Password = reader.GetString("password"),
+                            Role = userRepo.GetRole(reader.GetInt32("userRoleId"))
+                        };
+                        break;
+
+                    case (int)UserRole.Staff + 1:
+                        o.User = new Staff()
+                        {
+                            Id = reader.GetGuid("id"),
+                            FirstName = reader.GetString("firstName"),
+                            LastName = reader.GetString("lastName"),
+                            Email = reader.GetString("email"),
+                            Password = reader.GetString("password"),
+                            Role = userRepo.GetRole(reader.GetInt32("userRoleId"))
+                        };
+                        break;
+                    default:
+                        o.User = new Customer();
+                        break;
+                }
+            }
+
+            conn.Close();
             return orders;
         }
 

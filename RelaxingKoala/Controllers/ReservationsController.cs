@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using MySqlConnector;
 using RelaxingKoala.Data;
 using RelaxingKoala.Models;
-using System.Runtime.InteropServices;
 
 namespace RelaxingKoala.Controllers
 {

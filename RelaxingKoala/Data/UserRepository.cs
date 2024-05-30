@@ -85,7 +85,7 @@ namespace RelaxingKoala.Data
             }
         }
 
-        private UserRole GetRole(int id)
+        public UserRole GetRole(int id)
         {
             using var conn = _dataSource.OpenConnection();
             using var cmd = conn.CreateCommand();

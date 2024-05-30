@@ -66,7 +66,7 @@
                 <div class="col-md-12 text-center">
                     <a class="btn btn-warning btn-lg" asp-area="" asp-controller="Reservations" asp-action="Index">Manage Reservations</a>
                     <a class="btn btn-warning btn-lg" asp-area="" asp-controller="" asp-action="">Manage Orders</a>
-                    <a class="btn btn-warning btn-lg" asp-area="" asp-controller="Kitchen" asp-action="Index">Kitchen</a>
+                    <a class="btn btn-warning btn-lg" asp-area="" asp-controller="Kitchen" asp-route-id="Model.Id" asp-action="Index">Kitchen</a>
                 </div>
             </div>
         }

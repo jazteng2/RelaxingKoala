@@ -25,8 +25,9 @@ namespace RelaxingKoala.Data
                     list.Add(new MenuItem()
                     {
                         Id = reader.GetInt32("id"),
-                        Cost = reader.GetInt32("cost"),
                         Name = reader.GetString("title"),
+                        Cost = reader.GetInt32("cost"),
+                        Availability = reader.GetBoolean("availability")
                     });
                 }
                 return list;
@@ -38,28 +39,33 @@ namespace RelaxingKoala.Data
         {
             using var conn = _dataSource.OpenConnection();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = @"SELECT * FROM menuitem";
+            cmd.CommandText = @"SELECT * FROM menuitem WHERE id = @id";
+            cmd.Parameters.AddWithValue("id", id);
             var reader = cmd.ExecuteReader();
             if (!reader.Read()) return new MenuItem();
             var menuitem = new MenuItem()
             {
                 Id = reader.GetInt32("id"),
-                Cost = reader.GetInt32("cost"),
                 Name = reader.GetString("title"),
+                Cost = reader.GetInt32("cost"),
+                Availability = reader.GetBoolean("availability")
             };
             return menuitem;
         }
 
-        public void Update(MenuItem item)
+        public bool Update(MenuItem item)
         {
             using var conn = _dataSource.OpenConnection();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = @"UPDATE menuitem set cost = @cost, availability = @availability WHERE id = @id";
+            cmd.CommandText = @"UPDATE menuitem SET cost = @cost, availability = @availability WHERE id = @id";
             cmd.Parameters.AddWithValue("cost", item.Cost);
             cmd.Parameters.AddWithValue("availability", item.Availability);
             cmd.Parameters.AddWithValue("id", item.Id);
-            cmd.ExecuteNonQuery();
+            int affectedRows = cmd.ExecuteNonQuery();
             conn.Close();
+
+            if (affectedRows > 0) return true;
+            return false;
         }
     }
 }
