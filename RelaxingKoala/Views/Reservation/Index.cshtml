@@ -1,0 +1,31 @@
+﻿@model IEnumerable<RelaxingKoala.Models.Reservation>
+
+<h2>Manage Reservations</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Created Date</th>
+            <th>Reserved Date</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+            <th>Number of People</th>
+            <th>User</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var reservation in Model)
+        {
+            <tr>
+                <td>@reservation.CreatedDate</td>
+                <td>@reservation.ReservedDate</td>
+                <td>@reservation.StartTime</td>
+                <td>@reservation.EndTime</td>
+                <td>@reservation.NumberOfPeople</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a href="@Url.Action("Create")">Make a Reservation</a>

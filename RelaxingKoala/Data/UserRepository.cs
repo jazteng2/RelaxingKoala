@@ -1,11 +1,12 @@
 ﻿using MySqlConnector;
 using RelaxingKoala.Models.Users;
+using System;
 
 namespace RelaxingKoala.Data
 {
     public class UserRepository
     {
-        private readonly MySqlDataSource _dataSource;
+        MySqlDataSource _dataSource;
         public UserRepository(MySqlDataSource dataSource)
         {
             _dataSource = dataSource;
@@ -15,36 +16,34 @@ namespace RelaxingKoala.Data
         {
             using var conn = _dataSource.OpenConnection();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = @"SELECT * FROM user WHERE email = @email";
-            cmd.Parameters.AddWithValue("email", email);
+            cmd.CommandText = @"SELECT * FROM user WHERE email = @Email";
+            cmd.Parameters.AddWithValue("@Email", email);
             var reader = cmd.ExecuteReader();
-            if (reader.Read())
+            if (!reader.Read()) return new Customer();
+            var role = reader.GetInt32("userRoleId");
+            switch (role)
             {
-                var name = reader.GetString("firstName");
-                var role = reader.GetInt32("userRoleId");
-                if (role == (int) UserRole.Customer)
-                {
+                case (int)UserRole.Customer + 1:
                     return new Customer()
                     {
-                        Id = reader.GetGuid("Id"),
+                        Id = reader.GetGuid("id"),
                         FirstName = reader.GetString("firstName"),
                         LastName = reader.GetString("lastName"),
                         Email = reader.GetString("email"),
                         Password = reader.GetString("password")
                     };
-                } else if (role == (int) UserRole.Staff)
-                {
+                case (int)UserRole.Staff + 1:
                     return new Staff()
                     {
-                        Id = reader.GetGuid("Id"),
+                        Id = reader.GetGuid("id"),
                         FirstName = reader.GetString("firstName"),
                         LastName = reader.GetString("lastName"),
                         Email = reader.GetString("email"),
                         Password = reader.GetString("password")
                     };
-                }
+                default:
+                    return new Customer();
             }
-            return new Customer();
         }
     }
 }
