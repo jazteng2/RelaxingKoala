@@ -49,8 +49,9 @@ namespace RelaxingKoala.Data
             }
         }
 
-        public User GetById(Guid id)
+        public User GetById(Guid? id)
         {
+            if (!id.HasValue) return new Customer();
             using var conn = _dataSource.OpenConnection();
             using var cmd = conn.CreateCommand();
             cmd.CommandText = @"SELECT * FROM user WHERE id = @id";
