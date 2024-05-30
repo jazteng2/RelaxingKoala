@@ -7,6 +7,7 @@ namespace RelaxingKoala.Models
     public class Invoice
     {
         public Guid Id { get; set; }
+        public DateOnly CreatedDate { get; set; }
         public int TotalPay { get; set; }
         public int GivenPay { get; set; }
         public int ExcessPay { get; set; }
