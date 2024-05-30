@@ -2,6 +2,8 @@
 using MySqlConnector;
 using RelaxingKoala.Data;
 using RelaxingKoala.Models.ViewModels;
+using RelaxingKoala.Models.Users;
+using Newtonsoft.Json;
 
 namespace RelaxingKoala.Controllers
 {
@@ -25,12 +27,13 @@ namespace RelaxingKoala.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = _userRepository.GetByEmail(model.Email);
+                User user = _userRepository.GetByEmail(model.Email);
                 if (user != null && user.Password == model.Password)
                 {
-                    TempData["UserId"] = user.Id.ToString();
+                    user.Password = string.Empty;
+                    TempData["User"] = JsonConvert.SerializeObject(user);
                     TempData["UserRole"] = user.Role;
-                    return RedirectToAction("Index", "Home");
+                    return RedirectToAction("Index", "Home", TempData);
                 }
                 ModelState.AddModelError("", "Invalid login attempt.");
             }

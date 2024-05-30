@@ -1,16 +1,37 @@
-﻿@{
+﻿@using RelaxingKoala.Models.Users
+@model RelaxingKoala.Models.Users.User
+@{
     ViewData["Title"] = "Home Page";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome to Relaxing Koala Restaurant</h1>
-    <p class="lead">Experience the best dining with a relaxing ambiance</p>
-    <hr class="my-4" />
-    <p>Our restaurant offers a wide variety of delicious dishes, comfortable seating, and excellent customer service. Explore our menu, make reservations, and enjoy special offers!</p>
-    <a class="btn btn-primary btn-lg" asp-area="" asp-controller="Reservations" asp-action="Create">Make a Reservation</a>
-    <a class="btn btn-secondary btn-lg" asp-area="" asp-controller="Menu" asp-action="Index">View Menu</a>
-    <a class="btn btn-secondary btn-lg" asp-area="" asp-controller="" asp-action="">Make an Order</a>
+    @if (Model != null)
+    {
+        <h1 class="display-4">Welcome back @Model.FirstName</h1>
+    }else
+    {
+        <h1 class="display-4">Welcome to Relaxing Koala Restaurant</h1>
+        <p class="lead">Experience the best dining with a relaxing ambiance</p>
+        <hr class="my-4" />
+        <p>Our restaurant offers a wide variety of delicious dishes, comfortable seating, and excellent customer service. Explore our menu, make reservations, and enjoy special offers!</p>
+    }
 
+    @* Navigation Bar *@
+    @if (Model != null)
+    {
+        if (Model.Role == UserRole.Customer)
+        {
+            <a class="btn btn-primary btn-lg" asp-area="" asp-controller="Reservations" asp-route-id="@Model.Id" asp-action="Create">Make a Reservation</a>
+            <a class="btn btn-secondary btn-lg" asp-area="" asp-controller="Menu" asp-action="Index">View Menu</a>
+            <a class="btn btn-secondary btn-lg" asp-area="" asp-route-id="@Model.Id" asp-controller="" asp-action="">Make an Order</a>
+        }
+        if (Model.Role == UserRole.Staff)
+        {
+            <a class="btn btn-primary btn-lg" asp-area="" asp-controller="Reservations" asp-action="Create">Make a Reservation</a>
+            <a class="btn btn-secondary btn-lg" asp-area="" asp-controller="Menu" asp-action="Index">View Menu</a>
+            <a class="btn btn-secondary btn-lg" asp-area="" asp-controller="" asp-action="">Make an Order</a>
+        }
+    }
 </div>
 
 <div class="container mt-5">
@@ -28,33 +49,26 @@
             <p>We would love to hear from you. Reach out to us for any inquiries, feedback, or reservations. You can contact us via phone, email, or visit our restaurant. <a asp-area="" asp-controller="Contact" asp-action="Index">Contact us</a></p>
         </div>
     </div>
-    @if (TempData["UserRole"] != null)
+    @if (Model != null)
     {
-        var role = TempData["UserRole"].ToString();
-        if ( role == "Driver" || role == "Admin")
+        if (Model.Role == UserRole.Customer)
         {
             <div class="row mt-4">
-                Hello @role!
-
                 <div class="col-md-12 text-center">
-                    <a class="btn btn-warning btn-lg" asp-area="" asp-controller="Reservations" asp-action="Index">Manage Reservations</a>
+                    <a class="btn btn-warning btn-lg" asp-area="" asp-controller="Reservations" asp-route-id="@Model.Id" asp-action="Index">Manage Reservations</a>
                     <a class="btn btn-warning btn-lg" asp-area="" asp-controller="" asp-action="">Manage Orders</a>
-
                 </div>
             </div>
         }
-        else
+        else if (Model.Role == UserRole.Staff)
         {
             <div class="row mt-4">
-                Hello @role!
-
                 <div class="col-md-12 text-center">
                     <a class="btn btn-warning btn-lg" asp-area="" asp-controller="Reservations" asp-action="Index">Manage Reservations</a>
                     <a class="btn btn-warning btn-lg" asp-area="" asp-controller="" asp-action="">Manage Orders</a>
-
+                    <a class="btn btn-warning btn-lg" asp-area="" asp-controller="Kitchen" asp-action="Index">Kitchen</a>
                 </div>
             </div>
-            
         }
     }
 </div>
