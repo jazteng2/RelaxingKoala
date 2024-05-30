@@ -16,6 +16,17 @@ namespace RelaxingKoala.Controllers
             _reservationRepository = new ReservationRepository(dataSource);
             _tableRepository = new TableRepository(dataSource); 
         }
+        public IActionResult MyReservations()
+        {
+            if (TempData["UserId"] == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var userId = Guid.Parse(TempData["UserId"].ToString());
+            var reservations = _reservationRepository.GetByUserId(userId);
+            return View(reservations);
+        }
 
         public IActionResult Index(Guid? id)
         {
@@ -57,18 +68,15 @@ namespace RelaxingKoala.Controllers
             return View(reservation);
         }
 
-        public IActionResult Edit(Guid? id)
+        public IActionResult Edit(Guid id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var reservation = _reservationRepository.GetById(id.Value);
+            var reservation = _reservationRepository.GetById(id);
             if (reservation == null)
             {
                 return NotFound();
             }
+
+            ViewBag.Tables = _reservationRepository.GetAvailableTables();
             return View(reservation);
         }
 
@@ -124,12 +132,12 @@ namespace RelaxingKoala.Controllers
         public IActionResult DeleteConfirmed(Guid id)
         {
             _reservationRepository.Delete(id);
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(MyReservations));
         }
 
         private bool ReservationExists(Guid id)
         {
-            return _reservationRepository.Exists(id); // Implement Exists method in ReservationRepository if necessary
+            return _reservationRepository.Exists(id); 
         }
     }
 }

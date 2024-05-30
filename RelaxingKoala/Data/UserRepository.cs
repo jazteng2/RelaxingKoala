@@ -1,13 +1,13 @@
 ﻿using MySqlConnector;
 using RelaxingKoala.Models.Orders;
 using RelaxingKoala.Models.Users;
-using System;
 
 namespace RelaxingKoala.Data
 {
     public class UserRepository
     {
-        MySqlDataSource _dataSource;
+        private readonly MySqlDataSource _dataSource;
+        
         public UserRepository(MySqlDataSource dataSource)
         {
             _dataSource = dataSource;
@@ -57,24 +57,31 @@ namespace RelaxingKoala.Data
             cmd.CommandText = @"SELECT * FROM user WHERE id = @id";
             cmd.Parameters.AddWithValue("id", id);
             var reader = cmd.ExecuteReader();
-            if (!reader.Read()) return new Customer();
-            var role = reader.GetInt32("userRoleId");
+            if (!reader.Read()) return null; // Return null if no user is found
+
+            var roleString = reader.GetString("userRoleId");
+            if (!int.TryParse(roleString, out int role))
+            {
+                // Handle the error or default to a specific role
+                role = (int)UserRole.Customer; // Default to Customer if conversion fails
+            }
+
             switch (role)
             {
-                case (int)UserRole.Customer + 1:
+                case (int)UserRole.Customer:
                     return new Customer()
                     {
-                        Id = reader.GetGuid("id"),
+                        Id = Guid.Parse(reader.GetString("id")),
                         FirstName = reader.GetString("firstName"),
                         LastName = reader.GetString("lastName"),
                         Email = reader.GetString("email"),
                         Password = reader.GetString("password"),
                         Role = GetRole(reader.GetInt32("userRoleId"))
                     };
-                case (int)UserRole.Staff + 1:
+                case (int)UserRole.Staff:
                     return new Staff()
                     {
-                        Id = reader.GetGuid("id"),
+                        Id = Guid.Parse(reader.GetString("id")),
                         FirstName = reader.GetString("firstName"),
                         LastName = reader.GetString("lastName"),
                         Email = reader.GetString("email"),
@@ -84,17 +91,6 @@ namespace RelaxingKoala.Data
                 default:
                     return new Customer();
             }
-        }
-
-        public UserRole GetRole(int id)
-        {
-            using var conn = _dataSource.OpenConnection();
-            using var cmd = conn.CreateCommand();
-            cmd.CommandText = @"SELECT * FROM userrole WHERE userroleid = @id";
-            cmd.Parameters.AddWithValue("id", id);
-            var reader = cmd.ExecuteReader();
-            reader.Read();
-            return (UserRole)Enum.Parse(typeof(UserRole), reader.GetString(1));
         }
     }
 }

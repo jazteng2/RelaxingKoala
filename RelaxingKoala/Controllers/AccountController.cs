@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MySqlConnector;
 using RelaxingKoala.Data;
+using RelaxingKoala.Models.Users;
 using RelaxingKoala.Models.ViewModels;
 using RelaxingKoala.Models.Users;
 using Newtonsoft.Json;
@@ -45,6 +46,32 @@ namespace RelaxingKoala.Controllers
             TempData.Remove("UserId");
             TempData.Remove("UserRole");
             return RedirectToAction("Login", "Account");
+        }
+
+        [HttpGet]
+        public IActionResult Register()
+        {
+            return View(new RegisterViewModel());
+        }
+
+        [HttpPost]
+        public IActionResult Register(RegisterViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = new Customer
+                {
+                    Id = Guid.NewGuid(),
+                    FirstName = model.FirstName,
+                    LastName = model.LastName,
+                    Email = model.Email,
+                    Password = model.Password,
+                    UserRoleId = 1 // Assuming customers are being registered
+                };
+                _userRepository.Insert(user);
+                return RedirectToAction("Login");
+            }
+            return View(model);
         }
     }
 }

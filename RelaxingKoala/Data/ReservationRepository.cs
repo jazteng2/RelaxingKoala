@@ -7,6 +7,7 @@ namespace RelaxingKoala.Data
     public class ReservationRepository
     {
         private readonly MySqlDataSource _dataSource;
+
         public ReservationRepository(MySqlDataSource dataSource)
         {
             _dataSource = dataSource;
@@ -14,11 +15,9 @@ namespace RelaxingKoala.Data
 
         public List<Reservation> GetAll()
         {
-            // reservations
             var reservations = new List<Reservation>();
             using var conn = _dataSource.OpenConnection();
             using var command = conn.CreateCommand();
-
             command.CommandText = @"SELECT * FROM reservation";
             var reader = command.ExecuteReader();
             while (reader.Read())
@@ -36,7 +35,6 @@ namespace RelaxingKoala.Data
             }
             conn.Close();
 
-            // table reservation associations
             using var conn2 = _dataSource.OpenConnection();
             using var command2 = conn2.CreateCommand();
             command2.CommandText = @"SELECT * FROM tablereservation";
@@ -51,7 +49,6 @@ namespace RelaxingKoala.Data
 
         public Reservation? GetById(Guid id)
         {
-            // reservation
             using var conn = _dataSource.OpenConnection();
             using var command = conn.CreateCommand();
             command.CommandText = @"SELECT * FROM reservation WHERE id = @id";
@@ -73,7 +70,6 @@ namespace RelaxingKoala.Data
             };
             conn.Close();
 
-            // table reservation association
             using var conn2 = _dataSource.OpenConnection();
             using var command2 = conn2.CreateCommand();
             command2.CommandText = @"SELECT t.id
@@ -83,7 +79,7 @@ namespace RelaxingKoala.Data
 
             command2.Parameters.AddWithValue("id", reservation.Id);
             var reader2 = command2.ExecuteReader();
-            while(reader2.Read())
+            while (reader2.Read())
             {
                 reservation.Tables.Add(reader2.GetInt32("id"));
             }
@@ -91,55 +87,48 @@ namespace RelaxingKoala.Data
             return reservation;
         }
 
-        public List<Reservation> GetByUserId(Guid id)
+        public List<Reservation> GetByUserId(Guid userId)
         {
-            // reservation
+            var reservations = new List<Reservation>();
+
             using var conn = _dataSource.OpenConnection();
             using var command = conn.CreateCommand();
-            command.CommandText = @"SELECT * FROM reservation WHERE userid = @id";
-            command.Parameters.AddWithValue("id", id);
+            command.CommandText = @"SELECT * FROM reservation WHERE userId = @userId";
+            command.Parameters.AddWithValue("@userId", userId);
             var reader = command.ExecuteReader();
-            if (!reader.Read()) return new List<Reservation>();
-            
-            var list = new List<Reservation>();
             while (reader.Read())
             {
-                list.Add(new Reservation()
+                var reservation = new Reservation()
                 {
-                    Id = reader.GetGuid("id"),
+                    Id = Guid.Parse(reader.GetString("id")), // Use Guid.Parse to convert string to Guid
                     CreatedDate = DateOnly.FromDateTime(reader.GetDateTime("createdDate")),
                     ReservedDate = DateOnly.FromDateTime(reader.GetDateTime("reservedDate")),
                     StartTime = reader.GetTimeOnly("startTime"),
                     EndTime = reader.GetTimeOnly("endTime"),
                     NumberOfPeople = reader.GetInt32("numberofpeople"),
-                    UserId = reader.GetGuid("userId")
-                });
+                    UserId = Guid.Parse(reader.GetString("userId")) // Use Guid.Parse to convert string to Guid
+                };
+                reservations.Add(reservation);
             }
             conn.Close();
 
-            // table reservation association
-            
-
-            foreach (Reservation reservation in list)
+            foreach (var reservation in reservations)
             {
                 using var conn2 = _dataSource.OpenConnection();
-                using var cmd2 = conn2.CreateCommand();
-                cmd2.Parameters.Clear();
-                cmd2.CommandText = @"SELECT t.id
-                                    FROM dineintable t
-                                    JOIN tablereservation rt ON t.id = rt.tableId
-                                    WHERE rt.reservationId = @id";
-
-                cmd2.Parameters.AddWithValue("id", reservation.Id);
-                var reader2 = cmd2.ExecuteReader();
+                using var command2 = conn2.CreateCommand();
+                command2.CommandText = @"SELECT t.id FROM dineintable t
+                                         JOIN tablereservation rt ON t.id = rt.tableId
+                                         WHERE rt.reservationId = @reservationId";
+                command2.Parameters.AddWithValue("@reservationId", reservation.Id);
+                var reader2 = command2.ExecuteReader();
                 while (reader2.Read())
                 {
                     reservation.Tables.Add(reader2.GetInt32("id"));
                 }
                 conn2.Close();
             }
-            
-            return list;
+
+            return reservations;
         }
 
         public List<Table> GetReservedTables(Guid id)
@@ -164,9 +153,9 @@ namespace RelaxingKoala.Data
                     Availability = reader.GetBoolean("availability")
                 });
             }
-
             return list;
         }
+
         public List<Table> GetAvailableTables()
         {
             List<Table> tables = new List<Table>();
@@ -186,11 +175,8 @@ namespace RelaxingKoala.Data
             return tables;
         }
 
-
-
         public void Insert(Reservation res)
         {
-            // reservation
             using var conn = _dataSource.OpenConnection();
             using var command = conn.CreateCommand();
             command.CommandText = @"
@@ -207,7 +193,6 @@ namespace RelaxingKoala.Data
             command.ExecuteNonQuery();
             conn.Close();
 
-            // table reservation association
             using var conn2 = _dataSource.OpenConnection();
             var tr = conn2.BeginTransaction();
             using var command2 = conn2.CreateCommand();
@@ -223,14 +208,12 @@ namespace RelaxingKoala.Data
                 command2.Parameters.AddWithValue("rsId", res.Id);
                 command2.ExecuteNonQuery();
             }
-
             tr.Commit();
             conn2.Close();
         }
 
         public void Delete(Guid id)
         {
-            // table reservation association
             using var conn = _dataSource.OpenConnection();
             using var command = conn.CreateCommand();
             command.CommandText = @"DELETE FROM tablereservation WHERE reservationId = @id";
@@ -238,7 +221,6 @@ namespace RelaxingKoala.Data
             command.ExecuteNonQuery();
             conn.Close();
 
-            // reservation
             using var conn2 = _dataSource.OpenConnection();
             using var command2 = conn2.CreateCommand();
             command2.CommandText = @"DELETE FROM reservation WHERE id = @id";
@@ -249,7 +231,6 @@ namespace RelaxingKoala.Data
 
         public void Update(Reservation reservation)
         {
-            // Update reservation
             using var conn = _dataSource.OpenConnection();
             using var command = conn.CreateCommand();
             command.CommandText = @"
@@ -267,7 +248,6 @@ namespace RelaxingKoala.Data
             command.ExecuteNonQuery();
             conn.Close();
 
-            // Update table reservation associations
             using var conn2 = _dataSource.OpenConnection();
             var tr = conn2.BeginTransaction();
             using var command2 = conn2.CreateCommand();
@@ -287,7 +267,6 @@ namespace RelaxingKoala.Data
                 command2.Parameters.AddWithValue("rsId", reservation.Id);
                 command2.ExecuteNonQuery();
             }
-
             tr.Commit();
             conn2.Close();
         }
@@ -302,6 +281,4 @@ namespace RelaxingKoala.Data
             return count > 0;
         }
     }
-
 }
-

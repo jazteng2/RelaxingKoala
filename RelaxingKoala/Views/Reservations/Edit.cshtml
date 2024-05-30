@@ -1,12 +1,13 @@
 ﻿@model RelaxingKoala.Models.Reservation
 
 @{
-    ViewData["Title"] = "Make a Reservation";
+    ViewData["Title"] = "Edit Reservation";
 }
 
-<h2>Make a Reservation</h2>
+<h2>Edit Reservation</h2>
 
-<form asp-action="Create" method="post">
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="Id" />
     <div class="form-group">
         <label asp-for="ReservedDate" class="control-label"></label>
         <input asp-for="ReservedDate" class="form-control" />
@@ -23,19 +24,20 @@
         <label asp-for="NumberOfPeople" class="control-label"></label>
         <input asp-for="NumberOfPeople" class="form-control" />
     </div>
-        <input asp-for="UserId" class="form-control" type="hidden" value="@ViewBag.Id"/>
     <div class="form-group">
         <label asp-for="Tables" class="control-label"></label>
         <select asp-for="Tables" class="form-control" multiple="multiple">
-            @foreach (var table in ViewBag.Tables)
+            @if (ViewBag.Tables != null)
             {
-                <option value="@table.Id">@table.Number</option>
+                foreach (var table in ViewBag.Tables)
+                {
+                    var isSelected = Model.Tables.Contains(table.Id);
+                   // <option value="@table.Id" @((isSelected ? "selected" : ""))>@table.Number</option>
+                }
             }
         </select>
     </div>
     <div class="form-group">
-        <input type="submit" value="Create" class="btn btn-primary" />
+        <input type="submit" value="Save" class="btn btn-primary" />
     </div>
 </form>
-
-<a href="@Url.Action("MyReservations", "Reservations")" class="btn btn-secondary">Manage My Reservations</a>
