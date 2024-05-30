@@ -1,6 +1,7 @@
 ﻿using MySqlConnector;
 using RelaxingKoala.Models;
 using RelaxingKoala.Models.Orders;
+using System.Security.Cryptography;
 
 namespace RelaxingKoala.Data
 {
@@ -21,6 +22,7 @@ namespace RelaxingKoala.Data
             var reader = cmd.ExecuteReader();
 
             if (!reader.HasRows) return new DineInOrder();
+            reader.Read();
             var order = GetOrderObject(reader);
 
             // Get associated tables and menu items
@@ -62,37 +64,6 @@ namespace RelaxingKoala.Data
             }
 
             return tables;
-        }
-
-        public List<MenuItem> GetMenuItemsById(Guid id)
-        {
-            using var conn = _dataSource.OpenConnection();
-            using var cmd = conn.CreateCommand();
-            cmd.CommandText = @"
-                SELECT m.id, m.title, m.cost, m.availability
-                FROM menuitem m
-                JOIN menuitem_order morder ON m.id = morder.menuItemId
-                WHERE morder.customer_orderId = @orderId;
-            ";
-
-            cmd.Parameters.AddWithValue("orderId", id);
-
-            List<MenuItem> menuItems = new List<MenuItem>();
-            var reader = cmd.ExecuteReader();
-            if (!reader.HasRows) return menuItems;
-
-            while (reader.Read())
-            {
-                menuItems.Add(new MenuItem()
-                {
-                    Id = reader.GetInt32("id"),
-                    Name = reader.GetString("title"),
-                    Cost = reader.GetInt32("cost"),
-                    Availability = reader.GetBoolean("availability")
-                });
-            }
-
-            return menuItems;
         }
 
         public void Insert(IOrder order)
@@ -165,8 +136,8 @@ namespace RelaxingKoala.Data
                 WHERE id = @id
             ";
             cmd.Parameters.AddWithValue("cost", order.Cost);
-            cmd.Parameters.AddWithValue("state", (int) order.State + 1);
-            cmd.Parameters.AddWithValue("type", (int) order.Type + 1);
+            cmd.Parameters.AddWithValue("state", (int)order.State + 1);
+            cmd.Parameters.AddWithValue("type", (int)order.Type + 1);
             cmd.Parameters.AddWithValue("id", order.Id);
             cmd.ExecuteNonQuery();
 
@@ -190,7 +161,7 @@ namespace RelaxingKoala.Data
                 cmd.Parameters.Clear();
                 cmd.Parameters.AddWithValue("tableId", table.Id);
                 cmd.Parameters.AddWithValue("customer_orderId", order.Id);
-                cmd.ExecuteNonQuery(); 
+                cmd.ExecuteNonQuery();
             }
 
             // Insert new menu items
@@ -223,6 +194,30 @@ namespace RelaxingKoala.Data
             conn.Close();
         }
 
+        public List<IOrder> GetAllByState(OrderState state)
+        {
+            using var conn = _dataSource.OpenConnection();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"SELECT * FROM customer_order WHERE orderstateid = @state";
+            cmd.Parameters.AddWithValue("state", (int) state + 1);
+            List<IOrder> orders = new List<IOrder>();
+
+            var reader = cmd.ExecuteReader();
+            if (!reader.HasRows) return orders;
+            while (reader.Read())
+            {
+                
+                var order = GetOrderObject(reader);
+                var tables = GetTablesById(order.Id);
+                var menuItems = GetMenuItemsById(order.Id);
+                order.Tables = tables;
+                order.MenuItems = menuItems;
+                orders.Add(order);
+            }
+
+            return orders;
+        }
+
         private OrderState GetOrderState(int id)
         {
             using var conn = _dataSource.OpenConnection();
@@ -231,7 +226,7 @@ namespace RelaxingKoala.Data
             cmd.Parameters.AddWithValue("id", id);
             var reader = cmd.ExecuteReader();
             reader.Read();
-            return (OrderState) Enum.Parse(typeof(OrderState), reader.GetString(1));
+            return (OrderState)Enum.Parse(typeof(OrderState), reader.GetString(1));
         }
 
         private OrderType GetOrderType(int id)
@@ -242,12 +237,11 @@ namespace RelaxingKoala.Data
             cmd.Parameters.AddWithValue("id", id);
             var reader = cmd.ExecuteReader();
             reader.Read();
-            return (OrderType) Enum.Parse(typeof(OrderType), reader.GetString(1));
+            return (OrderType)Enum.Parse(typeof(OrderType), reader.GetString(1));
         }
 
         private IOrder GetOrderObject(MySqlDataReader reader)
         {
-            reader.Read();
             var type = reader.GetInt32("orderTypeId");
             switch (type)
             {
@@ -281,6 +275,37 @@ namespace RelaxingKoala.Data
                 default:
                     return new DineInOrder();
             }
+        }
+
+        private List<MenuItem> GetMenuItemsById(Guid id)
+        {
+            using var conn = _dataSource.OpenConnection();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"
+                SELECT m.id, m.title, m.cost, m.availability
+                FROM menuitem m
+                JOIN menuitem_order morder ON m.id = morder.menuItemId
+                WHERE morder.customer_orderId = @orderId;
+            ";
+
+            cmd.Parameters.AddWithValue("orderId", id);
+
+            List<MenuItem> menuItems = new List<MenuItem>();
+            var reader = cmd.ExecuteReader();
+            if (!reader.HasRows) return menuItems;
+
+            while (reader.Read())
+            {
+                menuItems.Add(new MenuItem()
+                {
+                    Id = reader.GetInt32("id"),
+                    Name = reader.GetString("title"),
+                    Cost = reader.GetInt32("cost"),
+                    Availability = reader.GetBoolean("availability")
+                });
+            }
+
+            return menuItems;
         }
     }
 }

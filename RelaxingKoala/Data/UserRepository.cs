@@ -1,4 +1,5 @@
 ﻿using MySqlConnector;
+using RelaxingKoala.Models.Orders;
 using RelaxingKoala.Models.Users;
 using System;
 
@@ -30,7 +31,8 @@ namespace RelaxingKoala.Data
                         FirstName = reader.GetString("firstName"),
                         LastName = reader.GetString("lastName"),
                         Email = reader.GetString("email"),
-                        Password = reader.GetString("password")
+                        Password = reader.GetString("password"),
+                        Role = GetRole(reader.GetInt32("userRoleId"))
                     };
                 case (int)UserRole.Staff + 1:
                     return new Staff()
@@ -39,11 +41,23 @@ namespace RelaxingKoala.Data
                         FirstName = reader.GetString("firstName"),
                         LastName = reader.GetString("lastName"),
                         Email = reader.GetString("email"),
-                        Password = reader.GetString("password")
+                        Password = reader.GetString("password"),
+                        Role = GetRole(reader.GetInt32("userRoleId"))
                     };
                 default:
                     return new Customer();
             }
+        }
+
+        private UserRole GetRole(int id)
+        {
+            using var conn = _dataSource.OpenConnection();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"SELECT * FROM userrole WHERE userroleid = @id";
+            cmd.Parameters.AddWithValue("id", id);
+            var reader = cmd.ExecuteReader();
+            reader.Read();
+            return (UserRole)Enum.Parse(typeof(UserRole), reader.GetString(1));
         }
     }
 }

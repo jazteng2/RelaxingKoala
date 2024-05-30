@@ -56,7 +56,7 @@ namespace TestRelaxingKoala
         public void TestFetchUserByEmail()
         {
             User u = userRepo.GetByEmail("emily.davis@example.com");
-            output.WriteLine(u.Id.ToString());
+            output.WriteLine(u.Role.ToString());
         }
 
         [Fact]

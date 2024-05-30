@@ -29,8 +29,8 @@ namespace RelaxingKoala.Controllers
                 if (user != null && user.Password == model.Password)
                 {
                     TempData["UserId"] = user.Id.ToString();
-                    TempData["UserRole"] = user.GetType().Name;
-                    return RedirectToAction("Index", "Home", user);
+                    TempData["UserRole"] = user.Role;
+                    return RedirectToAction("Index", "Home");
                 }
                 ModelState.AddModelError("", "Invalid login attempt.");
             }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RelaxingKoala.Models;
+using RelaxingKoala.Models.Users;
 using System.Diagnostics;
 
 namespace RelaxingKoala.Controllers
@@ -14,6 +15,11 @@ namespace RelaxingKoala.Controllers
 
         public IActionResult Index()
         {
+            if (TempData["UserId"] != null && TempData["UserRole"] != null)
+            {
+                ViewBag.UserId = TempData["UserId"];
+                ViewBag.UserRole = TempData["UserRole"];
+            } 
             return View();
         }
 

@@ -34,8 +34,8 @@ namespace TestRelaxingKoala
                 Id = Guid.NewGuid(),
                 Cost = 0,
                 UserId = c.Id,
-                State = OrderState.Payed,
-                Type = OrderType.Delivery,
+                State = OrderState.Confirmed,
+                Type = OrderType.DineIn,
             };
 
             var tables = tableRepo.GetAll();
@@ -64,13 +64,13 @@ namespace TestRelaxingKoala
         [Fact]
         public void TestUpdateOrder()
         {
-            Guid id = new Guid("03bd73e9-f53c-4c33-9e90-1993e794f683");
+            Guid id = new Guid("2d880532-b728-4a9d-91db-07608472e15d");
             var order = orderRepo.GetById(id);
             var tables = tableRepo.GetAll();
             var menuitems = menuItemRepo.GetAll();
             DisplayOrder(order);
 
-            order.State = OrderState.Ready;
+            order.State = OrderState.Confirmed;
             order.Tables.Clear();
             order.Tables.Add(tables[3]);
             order.Tables.Add(tables[5]);
@@ -93,6 +93,17 @@ namespace TestRelaxingKoala
             orderRepo.Delete(id);
             var getOrder = orderRepo.GetById(id);
             Assert.NotEqual(prevOrder, getOrder);
+        }
+
+        [Fact]
+        public void TestFetchOrderByState()
+        {
+            OrderState state = OrderState.Confirmed;
+            var orders = orderRepo.GetAllByState(state);
+            foreach (var order in orders)
+            {
+                DisplayOrder(orders[0]);
+            }    
         }
 
         private void DisplayOrder(IOrder order)
