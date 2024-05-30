@@ -8,7 +8,8 @@
     @if (Model != null)
     {
         <h1 class="display-4">Welcome back @Model.FirstName</h1>
-    }else
+    }
+    else
     {
         <h1 class="display-4">Welcome to Relaxing Koala Restaurant</h1>
         <p class="lead">Experience the best dining with a relaxing ambiance</p>
@@ -23,13 +24,13 @@
         {
             <a class="btn btn-primary btn-lg" asp-area="" asp-controller="Reservations" asp-route-id="@Model.Id" asp-action="Create">Make a Reservation</a>
             <a class="btn btn-secondary btn-lg" asp-area="" asp-controller="Menu" asp-action="Index">View Menu</a>
-            <a class="btn btn-secondary btn-lg" asp-area="" asp-route-id="@Model.Id" asp-controller="" asp-action="">Make an Order</a>
+            <a class="btn btn-secondary btn-lg" asp-area="" asp-controller="Orders" asp-action="Create">Make an Order</a>
         }
         if (Model.Role == UserRole.Staff)
         {
             <a class="btn btn-primary btn-lg" asp-area="" asp-controller="Reservations" asp-action="Create">Make a Reservation</a>
             <a class="btn btn-secondary btn-lg" asp-area="" asp-controller="Menu" asp-action="Index">View Menu</a>
-            <a class="btn btn-secondary btn-lg" asp-area="" asp-controller="" asp-action="">Make an Order</a>
+            <a class="btn btn-secondary btn-lg" asp-area="" asp-controller="Orders" asp-action="Create">Make an Order</a>
         }
     }
 </div>
@@ -56,7 +57,7 @@
             <div class="row mt-4">
                 <div class="col-md-12 text-center">
                     <a class="btn btn-warning btn-lg" asp-area="" asp-controller="Reservations" asp-route-id="@Model.Id" asp-action="Index">Manage Reservations</a>
-                    <a class="btn btn-warning btn-lg" asp-area="" asp-controller="" asp-action="">Manage Orders</a>
+                    <a class="btn btn-warning btn-lg" asp-area="" asp-controller="Orders" asp-action="Index">Manage Orders</a>
                 </div>
             </div>
         }
@@ -65,7 +66,7 @@
             <div class="row mt-4">
                 <div class="col-md-12 text-center">
                     <a class="btn btn-warning btn-lg" asp-area="" asp-controller="Reservations" asp-action="Index">Manage Reservations</a>
-                    <a class="btn btn-warning btn-lg" asp-area="" asp-controller="" asp-action="">Manage Orders</a>
+                    <a class="btn btn-warning btn-lg" asp-area="" asp-controller="Orders" asp-action="Index">Manage Orders</a>
                     <a class="btn btn-warning btn-lg" asp-area="" asp-controller="Kitchen" asp-route-id="Model.Id" asp-action="Index">Kitchen</a>
                 </div>
             </div>

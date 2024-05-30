@@ -53,6 +53,28 @@ namespace RelaxingKoala.Data
             return menuitem;
         }
 
+        public List<MenuItem> GetByIds(IEnumerable<int> ids)
+        {
+            using var conn = _dataSource.OpenConnection();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = $"SELECT * FROM menuitem WHERE id IN ({string.Join(",", ids)})";
+            var reader = cmd.ExecuteReader();
+
+            List<MenuItem> menuItems = new List<MenuItem>();
+            while (reader.Read())
+            {
+                menuItems.Add(new MenuItem
+                {
+                    Id = reader.GetInt32("id"),
+                    Name = reader.GetString("title"),
+                    Cost = reader.GetInt32("cost"),
+                    Availability = reader.GetBoolean("availability")
+                });
+            }
+
+            return menuItems;
+        }
+
         public bool Update(MenuItem item)
         {
             using var conn = _dataSource.OpenConnection();

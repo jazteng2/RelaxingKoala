@@ -1,0 +1,45 @@
+﻿@model IEnumerable<RelaxingKoala.Models.Orders.IOrder>
+
+@{
+    ViewData["Title"] = "My Orders";
+}
+
+<h2>My Orders</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Order ID</th>
+            <th>Cost</th>
+            <th>Order State</th>
+            <th>Order Type</th>
+            <th>Menu Items</th>
+            <th>Tables</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var order in Model)
+        {
+            <tr>
+                <td>@order.Id</td>
+                <td>@order.Cost</td>
+                <td>@order.State</td>
+                <td>@order.Type</td>
+                <td>@string.Join(", ", order.MenuItems.Select(mi => mi.Name))</td>
+                <td>
+                    @if (order is RelaxingKoala.Models.Orders.DineInOrder dineInOrder)
+                    {
+                        @string.Join(", ", dineInOrder.Tables.Select(t => "Table " + t.Number))
+                    }
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@order.Id" class="btn btn-primary">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@order.Id" class="btn btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-action="Create" class="btn btn-primary">Create New Order</a>
