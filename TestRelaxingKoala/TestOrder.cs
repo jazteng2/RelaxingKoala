@@ -28,24 +28,22 @@ namespace TestRelaxingKoala
         [Fact]
         public void TestInsertOrder()
         {
-            Customer c = customerRepo.GetByFirstName("Emily");
-            DeliveryOrder order = new DeliveryOrder()
+            Customer c = customerRepo.GetByFirstName("jared");
+            DineInOrder order = new DineInOrder()
             {
                 Id = Guid.NewGuid(),
                 Cost = 0,
                 UserId = c.Id,
-                State = OrderState.Confirmed,
+                State = OrderState.Complete,
                 Type = OrderType.DineIn,
             };
 
             var tables = tableRepo.GetAll();
             var menuItems = menuItemRepo.GetAll();
 
-            order.Tables.Add(tables[1]);
-            order.Tables.Add(tables[2]);
+            order.Tables.Add(tables[6]);
 
             order.MenuItems.Add(menuItems[0]);
-            order.MenuItems.Add(menuItems[1]);
 
             order.RecalculateCost();
 
