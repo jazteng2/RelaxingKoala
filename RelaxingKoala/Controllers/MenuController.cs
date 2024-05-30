@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using MySqlConnector;
 using RelaxingKoala.Data;
 using RelaxingKoala.Models.ViewModels;
+using System.Security.Claims;
 
 namespace RelaxingKoala.Controllers
 {
+    [Authorize]
     public class MenuController : Controller
     {
         private readonly MenuItemRepository menuItemRepo;
@@ -14,15 +17,15 @@ namespace RelaxingKoala.Controllers
             menuItemRepo = new MenuItemRepository(dataSource);
             userRepo = new UserRepository(dataSource);
         }
-        public IActionResult Index(Guid? userId)
+        public IActionResult Index()
         {
-            var items = menuItemRepo.GetAll();
+            string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return View();
+            Console.WriteLine(userId);
+
             var viewModel = new MenuViewModel();
-            viewModel.MenuItems = items;
-            if (userId.HasValue)
-            {
-                viewModel.User = userRepo.GetById(userId.Value);
-            }
+            viewModel.MenuItems = menuItemRepo.GetAll();
+            viewModel.User = userRepo.GetById(new Guid(userId));
 
             return View(viewModel);
         }

@@ -1,13 +1,17 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using MySqlConnector;
 using RelaxingKoala.Data;
 using RelaxingKoala.Models;
 using RelaxingKoala.Models.Orders;
 using RelaxingKoala.Models.ViewModels;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Security.Claims;
 
 namespace RelaxingKoala.Controllers
 {
+    [Authorize]
     public class KitchenController : Controller
     {
         private readonly MenuItemRepository menuItemRepo;
@@ -17,7 +21,7 @@ namespace RelaxingKoala.Controllers
             menuItemRepo = new MenuItemRepository(dataSource);
             orderRepo = new OrderRepository(dataSource);
         }
-        public IActionResult Index(Guid id)
+        public IActionResult Index()
         {
             List<MenuItem> items = menuItemRepo.GetAll();
 

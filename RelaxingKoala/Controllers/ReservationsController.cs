@@ -1,11 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
 using MySqlConnector;
 using RelaxingKoala.Data;
 using RelaxingKoala.Models;
+using System.Security.Claims;
 
 namespace RelaxingKoala.Controllers
 {
+    [Authorize]
     public class ReservationsController : Controller
     {
         private readonly ReservationRepository _reservationRepository;
@@ -18,28 +22,21 @@ namespace RelaxingKoala.Controllers
         }
         public IActionResult MyReservations()
         {
-            if (TempData["UserId"] == null)
-            {
-                return RedirectToAction("Login", "Account");
-            }
+            // Get user id
+            string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return RedirectToAction("Login", "Account");
 
-            var userId = Guid.Parse(TempData["UserId"].ToString());
-            var reservations = _reservationRepository.GetByUserId(userId);
+            var reservations = _reservationRepository.GetByUserId(new Guid(userId));
             return View(reservations);
         }
 
-        public IActionResult Index(Guid? id)
+        public IActionResult Index()
         {
+            string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return RedirectToAction("Login", "Account");
+
             List<Reservation> reservations;
-
-            // Id exist
-            if (id.HasValue)
-            {
-                reservations = _reservationRepository.GetByUserId(id.Value);
-                return View(reservations);
-            }
-
-            reservations = _reservationRepository.GetAll();
+            reservations = _reservationRepository.GetByUserId(new Guid(userId));
             return View(reservations);
         }
 
@@ -71,10 +68,7 @@ namespace RelaxingKoala.Controllers
         public IActionResult Edit(Guid id)
         {
             var reservation = _reservationRepository.GetById(id);
-            if (reservation == null)
-            {
-                return NotFound();
-            }
+            if (reservation == null) return NotFound();
 
             ViewBag.Tables = _reservationRepository.GetAvailableTables();
             return View(reservation);
@@ -84,6 +78,7 @@ namespace RelaxingKoala.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Edit(Guid id, [Bind("Id,CreatedDate,ReservedDate,StartTime,EndTime,NumberOfPeople,UserId,Tables")] Reservation reservation)
         {
+
             if (id != reservation.Id)
             {
                 return NotFound();

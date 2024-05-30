@@ -24,15 +24,15 @@
         <label asp-for="NumberOfPeople" class="control-label"></label>
         <input asp-for="NumberOfPeople" class="form-control" />
     </div>
+    <input asp-for="UserId" class="form-control" type="hidden" value="@Model.UserId"/>
     <div class="form-group">
         <label asp-for="Tables" class="control-label"></label>
         <select asp-for="Tables" class="form-control" multiple="multiple">
             @if (ViewBag.Tables != null)
             {
-                foreach (var table in ViewBag.Tables)
+                @foreach (var table in ViewBag.Tables)
                 {
-                    var isSelected = Model.Tables.Contains(table.Id);
-                   // <option value="@table.Id" @((isSelected ? "selected" : ""))>@table.Number</option>
+                    <option value="@table.Id">@table.Number</option>
                 }
             }
         </select>

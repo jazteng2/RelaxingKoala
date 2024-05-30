@@ -4,6 +4,9 @@ using RelaxingKoala.Data;
 using RelaxingKoala.Models.Users;
 using RelaxingKoala.Models.ViewModels;
 using Newtonsoft.Json;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
 
 namespace RelaxingKoala.Controllers
 {
@@ -23,27 +26,40 @@ namespace RelaxingKoala.Controllers
         }
 
         [HttpPost]
-        public IActionResult Login(LoginViewModel model)
+        public async Task<IActionResult> Login(LoginViewModel model)
         {
             if (ModelState.IsValid)
             {
                 User user = _userRepository.GetByEmail(model.Email);
                 if (user != null && user.Password == model.Password)
                 {
+                    var claims = new List<Claim>()
+                    {
+                        new Claim(ClaimTypes.Name, user.Email),
+                        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
+                    };
+
+                    var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+                    await HttpContext.SignInAsync(
+                        CookieAuthenticationDefaults.AuthenticationScheme,
+                        new ClaimsPrincipal(claimsIdentity));
+
                     user.Password = string.Empty;
                     TempData["User"] = JsonConvert.SerializeObject(user);
                     TempData["UserRole"] = user.Role;
-                    return RedirectToAction("Index", "Home", TempData);
+                    return RedirectToAction("Index", "Home");
                 }
                 ModelState.AddModelError("", "Invalid login attempt.");
             }
             return View(model);
         }
 
-        public IActionResult Logout()
+        public async Task<IActionResult> Logout()
         {
             TempData.Remove("UserId");
             TempData.Remove("UserRole");
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Login", "Account");
         }
 

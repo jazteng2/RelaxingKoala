@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using MySqlConnector;
 using Newtonsoft.Json;
@@ -6,9 +7,11 @@ using RelaxingKoala.Data;
 using RelaxingKoala.Models;
 using RelaxingKoala.Models.Users;
 using System.Diagnostics;
+using System.Security.Claims;
 
 namespace RelaxingKoala.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
         private readonly UserRepository userRepo;
@@ -19,34 +22,12 @@ namespace RelaxingKoala.Controllers
 
         public IActionResult Index()
         {
-            var serializedUser = TempData["User"] as string;
-            var userRole = TempData["UserRole"];
-            if (serializedUser == null && userRole == null) return View();
-            switch (userRole)
-            {
-                case (int) UserRole.Customer:
-                    {
-                        var user = JsonConvert.DeserializeObject<Customer>(serializedUser);
-                        return View(user);
-                    }
-                case (int)UserRole.Staff:
-                    {
-                        var user = JsonConvert.DeserializeObject<Staff>(serializedUser);
-                        return View(user);
-                    }
-                case (int)UserRole.Admin:
-                    {
-                        var user = JsonConvert.DeserializeObject<Admin>(serializedUser);
-                        return View(user);
-                    }
-                case (int)UserRole.Driver:
-                    {
-                        var user = JsonConvert.DeserializeObject<Driver>(serializedUser);
-                        return View(user);
-                    }
-                default:
-                    return View();
-            }
+            string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return View();
+            Console.WriteLine(userId);
+            User user = userRepo.GetById(new Guid(userId));
+            user.Password = string.Empty;
+            return View(user);
         }
 
         public IActionResult Privacy()
