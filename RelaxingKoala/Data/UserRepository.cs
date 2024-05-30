@@ -57,31 +57,24 @@ namespace RelaxingKoala.Data
             cmd.CommandText = @"SELECT * FROM user WHERE id = @id";
             cmd.Parameters.AddWithValue("id", id);
             var reader = cmd.ExecuteReader();
-            if (!reader.Read()) return null; // Return null if no user is found
-
-            var roleString = reader.GetString("userRoleId");
-            if (!int.TryParse(roleString, out int role))
-            {
-                // Handle the error or default to a specific role
-                role = (int)UserRole.Customer; // Default to Customer if conversion fails
-            }
-
+            if (!reader.Read()) return new Customer();
+            var role = reader.GetInt32("userRoleId");
             switch (role)
             {
-                case (int)UserRole.Customer:
+                case (int)UserRole.Customer + 1:
                     return new Customer()
                     {
-                        Id = Guid.Parse(reader.GetString("id")),
+                        Id = reader.GetGuid("id"),
                         FirstName = reader.GetString("firstName"),
                         LastName = reader.GetString("lastName"),
                         Email = reader.GetString("email"),
                         Password = reader.GetString("password"),
                         Role = GetRole(reader.GetInt32("userRoleId"))
                     };
-                case (int)UserRole.Staff:
+                case (int)UserRole.Staff + 1:
                     return new Staff()
                     {
-                        Id = Guid.Parse(reader.GetString("id")),
+                        Id = reader.GetGuid("id"),
                         FirstName = reader.GetString("firstName"),
                         LastName = reader.GetString("lastName"),
                         Email = reader.GetString("email"),
@@ -91,6 +84,35 @@ namespace RelaxingKoala.Data
                 default:
                     return new Customer();
             }
+        }
+
+        public bool Insert(User user)
+        {
+            using var conn = _dataSource.OpenConnection();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"
+                INSERT INTO user (id, firstName, lastName, email, password, userRoleId)
+                VALUES (@id, @firstName, @lastName, @email, @password, @userRoleId);
+            ";
+            cmd.Parameters.AddWithValue("id", user.Id);
+            cmd.Parameters.AddWithValue("firstName", user.FirstName);
+            cmd.Parameters.AddWithValue("lastName", user.LastName);
+            cmd.Parameters.AddWithValue("email", user.Email);
+            cmd.Parameters.AddWithValue("password", user.Password);
+            cmd.Parameters.AddWithValue("userRoleId", (int) user.Role + 1);
+            var affectedRows = cmd.ExecuteNonQuery();
+            return affectedRows > 0 ? true : false;
+        }
+
+        public UserRole GetRole(int id)
+        {
+            using var conn = _dataSource.OpenConnection();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"SELECT * FROM userrole WHERE userroleid = @id";
+            cmd.Parameters.AddWithValue("id", id);
+            var reader = cmd.ExecuteReader();
+            reader.Read();
+            return (UserRole)Enum.Parse(typeof(UserRole), reader.GetString(1));
         }
     }
 }

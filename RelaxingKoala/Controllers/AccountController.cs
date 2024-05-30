@@ -3,7 +3,6 @@ using MySqlConnector;
 using RelaxingKoala.Data;
 using RelaxingKoala.Models.Users;
 using RelaxingKoala.Models.ViewModels;
-using RelaxingKoala.Models.Users;
 using Newtonsoft.Json;
 
 namespace RelaxingKoala.Controllers
@@ -66,7 +65,7 @@ namespace RelaxingKoala.Controllers
                     LastName = model.LastName,
                     Email = model.Email,
                     Password = model.Password,
-                    UserRoleId = 1 // Assuming customers are being registered
+                    Role = UserRole.Customer // Assuming customers are being registered
                 };
                 _userRepository.Insert(user);
                 return RedirectToAction("Login");
