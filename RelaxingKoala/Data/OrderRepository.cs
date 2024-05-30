@@ -129,13 +129,14 @@ namespace RelaxingKoala.Data
             conn.Close();
         }
 
-        public void Update(IOrder order)
+        public bool Update(IOrder order)
         {
             using var conn = _dataSource.OpenConnection();
             using var cmd = conn.CreateCommand();
-            cmd.Transaction = conn.BeginTransaction();
+            int affectedRows = 0;
 
             // Update order record
+            cmd.Transaction = conn.BeginTransaction();
             cmd.CommandText = @"
                 UPDATE customer_order SET 
                     cost = @cost, 
@@ -147,7 +148,8 @@ namespace RelaxingKoala.Data
             cmd.Parameters.AddWithValue("state", (int)order.State + 1);
             cmd.Parameters.AddWithValue("type", (int)order.Type + 1);
             cmd.Parameters.AddWithValue("id", order.Id);
-            cmd.ExecuteNonQuery();
+            affectedRows = cmd.ExecuteNonQuery();
+            if (affectedRows == 0) return false;
 
             // Clear existing table associations and menu items
             cmd.Parameters.Clear();
@@ -156,7 +158,9 @@ namespace RelaxingKoala.Data
                 DELETE FROM menuitem_order WHERE customer_orderId = @id;
             ";
             cmd.Parameters.AddWithValue("id", order.Id);
-            cmd.ExecuteNonQuery();
+            affectedRows = 0;
+            affectedRows = cmd.ExecuteNonQuery();
+            if (affectedRows == 0) return false;
 
             // Insert new associations
             cmd.Parameters.Clear();
@@ -169,7 +173,9 @@ namespace RelaxingKoala.Data
                 cmd.Parameters.Clear();
                 cmd.Parameters.AddWithValue("tableId", table.Id);
                 cmd.Parameters.AddWithValue("customer_orderId", order.Id);
-                cmd.ExecuteNonQuery();
+                affectedRows = 0;
+                affectedRows = cmd.ExecuteNonQuery();
+                if (affectedRows == 0) return false;
             }
 
             // Insert new menu items
@@ -183,11 +189,14 @@ namespace RelaxingKoala.Data
                 cmd.Parameters.Clear();
                 cmd.Parameters.AddWithValue("menuItemId", item.Id);
                 cmd.Parameters.AddWithValue("customer_orderId", order.Id);
-                cmd.ExecuteNonQuery();
+                affectedRows = 0;
+                affectedRows = cmd.ExecuteNonQuery();
+                if (affectedRows == 0) return false;
             }
 
             cmd.Transaction.Commit();
             conn.Close();
+            return true;
         }
 
         public void Delete(Guid id)
@@ -233,10 +242,10 @@ namespace RelaxingKoala.Data
             // Get associated users
             foreach (var o in orders)
             {
-                using var cmd = conn.CreateCommand();
-                cmd.CommandText = @"SELECT * FROM user WHERE id = @id";
-                cmd.Parameters.AddWithValue("id", o.UserId);
-                using var reader = cmd.ExecuteReader();
+                using var userCmd = conn.CreateCommand();
+                userCmd.CommandText = @"SELECT * FROM user WHERE id = @id";
+                userCmd.Parameters.AddWithValue("id", o.UserId);
+                using var reader = userCmd.ExecuteReader();
                 reader.Read();
                 var role = reader.GetInt32("userRoleId");
                 switch (role)
@@ -270,11 +279,68 @@ namespace RelaxingKoala.Data
                 }
             }
 
+            // Get associated tables
+            foreach (var o in orders)
+            {
+                using var tableCmd = conn.CreateCommand();
+                tableCmd.CommandText = @"
+                    SELECT t.id, t.tablenumber, t.availability
+                    FROM dineintable t
+                    JOIN table_order torder ON t.id = torder.tableId
+                    WHERE tOrder.customer_orderId = @orderId;
+                ";
+
+                tableCmd.Parameters.AddWithValue("orderId", o.Id);
+
+                List<Table> tables = new List<Table>();
+                using var reader = tableCmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    tables.Add(new Table()
+                    {
+                        Id = reader.GetInt32("id"),
+                        Number = reader.GetInt32("tableNumber"),
+                        Availability = reader.GetBoolean("availability")
+                    });
+                }
+                o.Tables = tables;
+            }
+
+            // Get associated menuitems
+            foreach (var o in orders)
+            {
+                using var menuItemCmd = conn.CreateCommand();
+                menuItemCmd.CommandText = @"
+                    SELECT m.id, m.title, m.cost, m.availability
+                    FROM menuitem m
+                    JOIN menuitem_order morder ON m.id = morder.menuItemId
+                    WHERE morder.customer_orderId = @orderId;
+                ";
+
+                menuItemCmd.Parameters.AddWithValue("orderId", o.Id);
+
+                List<MenuItem> menuItems = new List<MenuItem>();
+                using var reader = menuItemCmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    menuItems.Add(new MenuItem()
+                    {
+                        Id = reader.GetInt32("id"),
+                        Name = reader.GetString("title"),
+                        Cost = reader.GetInt32("cost"),
+                        Availability = reader.GetBoolean("availability")
+                    });
+                }
+                o.MenuItems = menuItems;
+            }
+
             conn.Close();
             return orders;
         }
 
-        private OrderState GetOrderState(int id)
+        public OrderState GetOrderState(int id)
         {
             using var conn = _dataSource.OpenConnection();
             using var cmd = conn.CreateCommand();

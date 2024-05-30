@@ -6,6 +6,7 @@
         Payed,
         Confirmed,
         Preparing,
-        Ready
+        Ready,
+        Complete
     }
 }
