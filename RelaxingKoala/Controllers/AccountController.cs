@@ -10,10 +10,9 @@ namespace RelaxingKoala.Controllers
     {
         private readonly UserRepository _userRepository;
 
-        public AccountController(IConfiguration configuration)
+        public AccountController(MySqlDataSource dataSource)
         {
-            var connectionString = configuration.GetConnectionString("Default");
-            _userRepository = new UserRepository(connectionString);
+            _userRepository = new UserRepository(dataSource);
         }
 
         [HttpGet]
@@ -32,7 +31,7 @@ namespace RelaxingKoala.Controllers
                 {
                     TempData["UserId"] = user.Id.ToString();
                     TempData["UserRole"] = user.GetType().Name;
-                    return RedirectToAction("Index", "Home");
+                    return RedirectToAction("Index", "Home", user);
                 }
                 ModelState.AddModelError("", "Invalid login attempt.");
             }
