@@ -27,8 +27,20 @@ namespace TestRelaxingKoala
             List<MenuItem> menuItems = _repo.GetAll();
             foreach (MenuItem item in menuItems)
             {
-                output.WriteLine("{0} {1} {2} {3}", item.Id, item.Name, item.Cost, item.Availability);
+                DisplayItem(item);
             }
+        }
+
+        [Fact]
+        public void TestGetById()
+        {
+            var item = _repo.GetById(1);
+            DisplayItem(item);
+        }
+
+        private void DisplayItem(MenuItem m)
+        {
+            output.WriteLine("{0} {1} {2} {3}", m.Id, m.Name, m.Cost, m.Availability);
         }
     }
 }

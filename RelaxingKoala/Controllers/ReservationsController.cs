@@ -33,8 +33,12 @@ namespace RelaxingKoala.Controllers
             return View(reservations);
         }
 
-        public IActionResult Create()
+        public IActionResult Create(Guid? id)
         {
+            if (id.HasValue)
+            {
+                ViewBag.Id = id.Value;
+            }
             ViewBag.Tables = _reservationRepository.GetAvailableTables();
             return View();
         }

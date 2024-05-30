@@ -34,6 +34,22 @@ namespace RelaxingKoala.Data
             return new List<MenuItem>();
         }
 
+        public MenuItem GetById(int id)
+        {
+            using var conn = _dataSource.OpenConnection();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"SELECT * FROM menuitem";
+            var reader = cmd.ExecuteReader();
+            if (!reader.Read()) return new MenuItem();
+            var menuitem = new MenuItem()
+            {
+                Id = reader.GetInt32("id"),
+                Cost = reader.GetInt32("cost"),
+                Name = reader.GetString("title"),
+            };
+            return menuitem;
+        }
+
         public void Update(MenuItem item)
         {
             using var conn = _dataSource.OpenConnection();
