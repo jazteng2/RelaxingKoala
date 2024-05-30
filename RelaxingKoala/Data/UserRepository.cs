@@ -1,6 +1,5 @@
 ﻿using MySqlConnector;
 using RelaxingKoala.Models.Users;
-using System;
 
 namespace RelaxingKoala.Data
 {
@@ -53,6 +52,21 @@ namespace RelaxingKoala.Data
                 }
             }
             return null;
+        }
+
+        public void Insert(User user)
+        {
+            using var conn = new MySqlConnection(_connectionString);
+            conn.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"INSERT INTO user (id, firstName, lastName, email, password, userRoleId) VALUES (@Id, @FirstName, @LastName, @Email, @Password, @UserRoleId)";
+            cmd.Parameters.AddWithValue("@Id", user.Id);
+            cmd.Parameters.AddWithValue("@FirstName", user.FirstName);
+            cmd.Parameters.AddWithValue("@LastName", user.LastName);
+            cmd.Parameters.AddWithValue("@Email", user.Email);
+            cmd.Parameters.AddWithValue("@Password", user.Password);
+            cmd.Parameters.AddWithValue("@UserRoleId", user.UserRoleId);
+            cmd.ExecuteNonQuery();
         }
     }
 }
