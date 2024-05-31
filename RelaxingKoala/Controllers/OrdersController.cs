@@ -4,8 +4,6 @@ using MySqlConnector;
 using RelaxingKoala.Data;
 using RelaxingKoala.Models;
 using RelaxingKoala.Models.Orders;
-using System;
-using System.Linq;
 
 namespace RelaxingKoala.Controllers
 {
@@ -127,7 +125,7 @@ namespace RelaxingKoala.Controllers
 
         public IActionResult MyOrders(Guid userId)
         {
-            var orders = _orderRepository.GetByUserId(userId);
+            var orders = _orderRepository.GetAllByUserId(userId);
             return View(orders);
         }
     }

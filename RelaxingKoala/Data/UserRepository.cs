@@ -7,46 +7,58 @@ namespace RelaxingKoala.Data
     public class UserRepository
     {
         private readonly MySqlDataSource _dataSource;
-        
+
         public UserRepository(MySqlDataSource dataSource)
         {
             _dataSource = dataSource;
         }
-        public User GetByEmail(string email)
+
+        public List<User> GetAll()
+        {
+            using var conn = _dataSource.OpenConnection();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"SELECT * FROM user";
+            var reader = cmd.ExecuteReader();
+            if (!reader.HasRows) return new List<User>();
+            List<User> users = new List<User>();
+            while (reader.Read())
+            {
+                users.Add(GetUserObject(reader));
+            }
+            conn.Close();
+            return users;
+        }
+
+        public User GetByEmail(string id)
         {
             using var conn = _dataSource.OpenConnection();
             using var cmd = conn.CreateCommand();
             cmd.CommandText = @"SELECT * FROM user WHERE email = @Email";
-            cmd.Parameters.AddWithValue("@Email", email);
+            cmd.Parameters.AddWithValue("@Email", id);
             var reader = cmd.ExecuteReader();
-            if (!reader.Read()) return null; // Return null if no user is found
-
-            var roleString = reader.GetString("userRoleId");
-            if (!int.TryParse(roleString, out int role))
-            {
-                // Handle the error or default to a specific role
-                role = (int)UserRole.Customer; // Default to Customer if conversion fails
-            }
-
+            if (!reader.Read()) return new Customer();
+            var role = reader.GetInt32("userRoleId");
             switch (role)
             {
-                case (int)UserRole.Customer:
+                case (int)UserRole.Customer + 1:
                     return new Customer()
                     {
-                        Id = Guid.Parse(reader.GetString("id")),
+                        Id = reader.GetGuid("id"),
                         FirstName = reader.GetString("firstName"),
                         LastName = reader.GetString("lastName"),
                         Email = reader.GetString("email"),
-                        Password = reader.GetString("password")
+                        Password = reader.GetString("password"),
+                        Role = GetRole(reader.GetInt32("userRoleId"))
                     };
-                case (int)UserRole.Staff:
+                case (int)UserRole.Staff + 1:
                     return new Staff()
                     {
-                        Id = Guid.Parse(reader.GetString("id")),
+                        Id = reader.GetGuid("id"),
                         FirstName = reader.GetString("firstName"),
                         LastName = reader.GetString("lastName"),
                         Email = reader.GetString("email"),
-                        Password = reader.GetString("password")
+                        Password = reader.GetString("password"),
+                        Role = GetRole(reader.GetInt32("userRoleId"))
                     };
                 case (int)UserRole.Admin + 1:
                     return new Admin()
@@ -59,10 +71,9 @@ namespace RelaxingKoala.Data
                         Role = GetRole(reader.GetInt32("userRoleId"))
                     };
                 default:
-                    return null; // Return null for unknown roles
+                    return new Customer();
             }
         }
-
 
         public User GetById(Guid? id)
         {
@@ -89,7 +100,7 @@ namespace RelaxingKoala.Data
             cmd.Parameters.AddWithValue("lastName", user.LastName);
             cmd.Parameters.AddWithValue("email", user.Email);
             cmd.Parameters.AddWithValue("password", user.Password);
-            cmd.Parameters.AddWithValue("userRoleId", (int) user.Role + 1);
+            cmd.Parameters.AddWithValue("userRoleId", (int)user.Role + 1);
             var affectedRows = cmd.ExecuteNonQuery();
             return affectedRows > 0 ? true : false;
         }
@@ -146,3 +157,4 @@ namespace RelaxingKoala.Data
         }
     }
 }
+

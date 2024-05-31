@@ -75,6 +75,25 @@ namespace RelaxingKoala.Data
             command.ExecuteNonQuery();
         }
 
+        public List<Table> GetAvailableTables()
+        {
+            List<Table> tables = new List<Table>();
+            using var conn = _dataSource.OpenConnection();
+            using var command = conn.CreateCommand();
+            command.CommandText = @"SELECT id, tableNumber, availability FROM dineintable WHERE availability = TRUE";
+            var reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                tables.Add(new Table
+                {
+                    Id = reader.GetInt32("id"),
+                    Number = reader.GetInt32("tableNumber"),
+                    Availability = reader.GetBoolean("availability")
+                });
+            }
+            return tables;
+        }
+
         public List<Table> GetTablesByOrderId(Guid id)
         {
             using var conn = _dataSource.OpenConnection();
