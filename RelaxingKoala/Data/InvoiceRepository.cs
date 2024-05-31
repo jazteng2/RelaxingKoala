@@ -64,7 +64,7 @@ namespace RelaxingKoala.Data
             if (!reader.HasRows) return new Invoice();
             return new Invoice()
             {
-                IId = reader.GetGuid("id"),
+                Id = reader.GetGuid("id"),
                 CreatedDate = reader.GetDateOnly("createdDate"),
                 TotalPay = reader.GetInt32("totalPay"),
                 GivenPay = reader.GetInt32("givenpay"),
@@ -82,7 +82,7 @@ namespace RelaxingKoala.Data
             cmd.CommandText = @"SELECT * FROM invoice WHERE userId = @userId";
             cmd.Parameters.AddWithValue("userId", id);
             var reader = cmd.ExecuteReader();
-            if (reader.HasRows) return new List<Invoice>();
+            if (!reader.HasRows) return new List<Invoice>();
             List<Invoice> list = new List<Invoice>();
             while (reader.Read())
             {
@@ -129,21 +129,6 @@ namespace RelaxingKoala.Data
                 });
             }
             return list;
-        }
-        public bool Update(Invoice i)
-        {
-            // Invoice exist because of an order therefore no update on orderId and userId
-            using var conn = _dataSource.OpenConnection();
-            using var cmd = conn.CreateCommand();
-            cmd.CommandText = @"
-                UPDATE invoice SET 
-                    totalPay = @totalPay,
-                    givenPay = @givenPay,
-                    excessPay = @excessPay,
-                    payMethodId = @payMethod
-            ";
-            var affectedRow = cmd.ExecuteNonQuery();
-            return affectedRow > 0 ? true : false;
         }
 
         public PaymentMethod GetPaymentMethod(int id)
