@@ -1,0 +1,81 @@
+﻿@model RelaxingKoala.Models.Orders.OrderViewModel
+
+@{
+    ViewBag.Title = "Create Order";
+}
+
+<h2>Create Order</h2>
+
+<form asp-action="Create" method="post">
+    <div class="form-group">
+        <label asp-for="UserId" class="control-label"></label>
+        <select asp-for="UserId" class="form-control" asp-items="ViewBag.Users"></select>
+    </div>
+    <div class="form-group">
+        <label asp-for="OrderTypeId" class="control-label"></label>
+        <select asp-for="OrderTypeId" class="form-control" asp-items="ViewBag.OrderTypes" id="orderTypeSelect"></select>
+    </div>
+    <div class="form-group">
+        <label asp-for="OrderStateId" class="control-label"></label>
+        <select asp-for="OrderStateId" class="form-control" asp-items="ViewBag.OrderStates"></select>
+    </div>
+    <div class="form-group">
+        <label>Menu Items</label>
+        <div>
+            @foreach (var menuItem in ViewBag.MenuItems)
+            {
+                <div class="form-check">
+                    <input class="form-check-input menu-item-checkbox" type="checkbox" value="@menuItem.Value" data-cost="@menuItem.Cost" name="MenuItems" id="menuItem_@menuItem.Value">
+                    <label class="form-check-label" for="menuItem_@menuItem.Value">
+                        @menuItem.Text (@menuItem.Cost $)
+                    </label>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="form-group" id="tablesSection" style="display: none;">
+        <label>Available Tables</label>
+        <div>
+            @foreach (var table in ViewBag.Tables)
+            {
+                <div class="form-check">
+                    <input class="form-check-input table-checkbox" type="checkbox" value="@table.Id" name="Tables" id="table_@table.Id">
+                    <label class="form-check-label" for="table_@table.Id">
+                        Table @table.Number
+                    </label>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="form-group">
+        <label>Total Cost: </label>
+        <span id="total-cost">@Model.Cost</span>
+    </div>
+    <div class="form-group">
+        <input type="submit" value="Create" class="btn btn-primary" />
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#orderTypeSelect').change(function () {
+                var selectedOrderType = $(this).val();
+                var dineInOrderType = "1";
+                if (selectedOrderType == dineInOrderType) {
+                    $('#tablesSection').show();
+                } else {
+                    $('#tablesSection').hide();
+                }
+            });
+
+            $('.menu-item-checkbox').change(function () {
+                var totalCost = 0;
+                $('.menu-item-checkbox:checked').each(function () {
+                    totalCost += parseFloat($(this).data('cost'));
+                });
+                $('#total-cost').text(totalCost);
+            });
+        });
+    </script>
+}

@@ -1,0 +1,56 @@
+﻿@model RelaxingKoala.Models.Orders.IOrder
+
+@{
+    ViewData["Title"] = "Edit Order";
+}
+
+<h2>Edit Order</h2>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="Id" />
+    <div class="form-group">
+        <label asp-for="Cost" class="control-label"></label>
+        <input asp-for="Cost" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="State" class="control-label"></label>
+        <select asp-for="State" class="form-control">
+            @foreach (var state in Enum.GetValues(typeof(RelaxingKoala.Models.Orders.OrderState)))
+            {
+                //<option value="@state" @(Model.State == (RelaxingKoala.Models.Orders.OrderState)state ? "selected" : "")>@state</option>
+            }
+        </select>
+    </div>
+    <div class="form-group">
+        <label asp-for="Type" class="control-label"></label>
+        <select asp-for="Type" class="form-control">
+            @foreach (var type in Enum.GetValues(typeof(RelaxingKoala.Models.Orders.OrderType)))
+            {
+                //<option value="@type" @(Model.Type == (RelaxingKoala.Models.Orders.OrderType)type ? "selected" : "")>@type</option>
+            }
+        </select>
+    </div>
+    <div class="form-group">
+        <label asp-for="Tables" class="control-label"></label>
+        <select asp-for="Tables" class="form-control" multiple="multiple">
+            @foreach (var table in ViewBag.Tables)
+            {
+                var selected = Model.Tables.Any(t => t.Id == table.Id) ? "selected" : "";
+                //<option value="@table.Id" @selected>@table.Number</option>
+            }
+        </select>
+    </div>
+    <div class="form-group">
+        <label asp-for="MenuItems" class="control-label"></label>
+        <select asp-for="MenuItems" class="form-control" multiple="multiple">
+            @foreach (var menuItem in ViewBag.MenuItems)
+            {
+                var selected = Model.MenuItems.Any(mi => mi.Id == menuItem.Id) ? "selected" : "";
+                //<option value="@menuItem.Id" @selected>@menuItem.Name</option>
+            }
+        </select>
+    </div>
+    <div class="form-group">
+        <input type="submit" value="Save" class="btn btn-primary" />
+    </div>
+</form>

@@ -1,11 +1,13 @@
 ﻿using MySqlConnector;
 using RelaxingKoala.Models;
+using System.Collections.Generic;
 
 namespace RelaxingKoala.Data
 {
     public class TableRepository
     {
         private readonly MySqlDataSource _dataSource;
+
         public TableRepository(MySqlDataSource dataSource)
         {
             _dataSource = dataSource;
@@ -17,7 +19,7 @@ namespace RelaxingKoala.Data
             using var conn = _dataSource.OpenConnection();
             using var command = conn.CreateCommand();
             command.CommandText = @"SELECT * FROM DineInTable";
-            var reader =  command.ExecuteReader();
+            var reader = command.ExecuteReader();
             while (reader.Read())
             {
                 list.Add(new Table
@@ -51,7 +53,6 @@ namespace RelaxingKoala.Data
         {
             using var conn = _dataSource.OpenConnection();
             using var command = conn.CreateCommand();
-            // INSERT
             command.CommandText = @"
                 INSERT INTO DineInTable (tableNumber, availability)
                 VALUES (@number, @availability);
@@ -61,7 +62,7 @@ namespace RelaxingKoala.Data
             command.Parameters.AddWithValue("availability", table.Availability);
             var reader = command.ExecuteReader();
             reader.Read();
-            return reader.GetInt32("LAST_INSERT_ID()");   
+            return reader.GetInt32("LAST_INSERT_ID()");
         }
 
         public void Update(Table table)
