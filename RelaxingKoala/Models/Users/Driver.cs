@@ -2,7 +2,7 @@
 
 namespace RelaxingKoala.Models.Users
 {
-    public class Driver
+    public class Driver : User
     {
         
     }

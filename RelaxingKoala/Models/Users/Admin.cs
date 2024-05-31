@@ -1,6 +1,6 @@
 ﻿namespace RelaxingKoala.Models.Users
 {
-    public class Admin
+    public class Admin : User
     {
     }
 }
