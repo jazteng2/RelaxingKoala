@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using MySqlConnector;
 using RelaxingKoala.Data;
 using RelaxingKoala.Models;
+using RelaxingKoala.Models.Users;
 using System.Security.Claims;
 
 namespace RelaxingKoala.Controllers
@@ -12,13 +13,14 @@ namespace RelaxingKoala.Controllers
     [Authorize]
     public class ReservationsController : Controller
     {
-        private readonly ReservationRepository _reservationRepository;
-        private readonly TableRepository _tableRepository;
-
+        private readonly ReservationRepository reservationRepo;
+        private readonly TableRepository tableRepo;
+        private readonly UserRepository userRepo;
         public ReservationsController(MySqlDataSource dataSource)
         {
-            _reservationRepository = new ReservationRepository(dataSource);
-            _tableRepository = new TableRepository(dataSource); 
+            reservationRepo = new ReservationRepository(dataSource);
+            tableRepo = new TableRepository(dataSource);
+            userRepo = new UserRepository(dataSource);
         }
 
         public IActionResult Index()
@@ -26,8 +28,16 @@ namespace RelaxingKoala.Controllers
             string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return RedirectToAction("Login", "Account");
 
+            UserRole role = userRepo.GetById(new Guid(userId)).Role;
             List<Reservation> reservations;
-            reservations = _reservationRepository.GetByUserId(new Guid(userId));
+            if (role == UserRole.Admin || role == UserRole.Staff)
+            {
+                reservations = reservationRepo.GetAll();
+            }
+            else
+            {
+                reservations = reservationRepo.GetByUserId(new Guid(userId));
+            }
             return View(reservations);
         }
 
@@ -35,7 +45,7 @@ namespace RelaxingKoala.Controllers
         {
             string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return RedirectToAction("Login", "Account");
-            ViewBag.Tables = _reservationRepository.GetAvailableTables();
+            ViewBag.Tables = reservationRepo.GetAvailableTables();
             return View(new Reservation() { UserId = new Guid(userId) });
 
         }
@@ -48,19 +58,19 @@ namespace RelaxingKoala.Controllers
             {
                 reservation.Id = Guid.NewGuid();
                 reservation.CreatedDate = DateOnly.FromDateTime(DateTime.Now);
-                _reservationRepository.Insert(reservation);
+                reservationRepo.Insert(reservation);
                 return RedirectToAction(nameof(Index), new { id = reservation.UserId });
             }
-            ViewBag.Tables = _reservationRepository.GetAvailableTables(); // Ensure ViewBag is set on postback
+            ViewBag.Tables = reservationRepo.GetAvailableTables(); // Ensure ViewBag is set on postback
             return View(reservation);
         }
 
         public IActionResult Edit(Guid id)
         {
-            var reservation = _reservationRepository.GetById(id);
+            var reservation = reservationRepo.GetById(id);
             if (reservation == null) return NotFound();
 
-            ViewBag.Tables = _reservationRepository.GetAvailableTables();
+            ViewBag.Tables = reservationRepo.GetAvailableTables();
             return View(reservation);
         }
 
@@ -78,11 +88,11 @@ namespace RelaxingKoala.Controllers
             {
                 try
                 {
-                    _reservationRepository.Update(reservation); // Implement Update method in ReservationRepository if necessary
+                    reservationRepo.Update(reservation); // Implement Update method in ReservationRepository if necessary
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!_reservationRepository.Exists(reservation.Id))
+                    if (!reservationRepo.Exists(reservation.Id))
                     {
                         return NotFound();
                     }
@@ -100,7 +110,7 @@ namespace RelaxingKoala.Controllers
         {
             if (id == null) return BadRequest();
 
-            var reservation = _reservationRepository.GetById(id.Value);
+            var reservation = reservationRepo.GetById(id.Value);
             if (reservation == null) return NotFound();
 
             return View(reservation);
@@ -110,13 +120,13 @@ namespace RelaxingKoala.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(Guid id)
         {
-            _reservationRepository.Delete(id);
+            reservationRepo.Delete(id);
             return RedirectToAction(nameof(Index));
         }
 
         private bool ReservationExists(Guid id)
         {
-            return _reservationRepository.Exists(id); 
+            return reservationRepo.Exists(id);
         }
     }
 }

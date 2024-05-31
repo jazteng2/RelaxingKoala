@@ -34,44 +34,13 @@ namespace RelaxingKoala.Data
             var order = GetOrderObject(reader);
 
             // Get associated tables and menu items
-            var tables = GetTablesById(order.Id);
-            var menuItems = GetMenuItemsById(order.Id);
+            var tables = tableRepo.GetTablesByOrderId(order.Id);
+            var menuItems = menuItemRepo.GetMenuItemsByOrderId(order.Id);
             order.Tables = tables;
             order.MenuItems = menuItems;
 
             return order;
 
-        }
-
-        public List<Table> GetTablesById(Guid id)
-        {
-            using var conn = _dataSource.OpenConnection();
-            using var cmd = conn.CreateCommand();
-            cmd.CommandText = @"
-                SELECT t.id, t.tablenumber, t.availability
-                FROM dineintable t
-                JOIN table_order torder ON t.id = torder.tableId
-                WHERE tOrder.customer_orderId = @orderId;
-            ";
-
-            cmd.Parameters.AddWithValue("orderId", id);
-
-            List<Table> tables = new List<Table>();
-            var reader = cmd.ExecuteReader();
-            if (!reader.HasRows) return tables;
-
-
-            while (reader.Read())
-            {
-                tables.Add(new Table()
-                {
-                    Id = reader.GetInt32("id"),
-                    Number = reader.GetInt32("tableNumber"),
-                    Availability = reader.GetBoolean("availability")
-                });
-            }
-
-            return tables;
         }
 
         public void Insert(IOrder order)
@@ -225,8 +194,8 @@ namespace RelaxingKoala.Data
             {
                 
                 var order = GetOrderObject(reader);
-                var tables = GetTablesById(order.Id);
-                var menuItems = GetMenuItemsById(order.Id);
+                var tables = tableRepo.GetTablesByOrderId(order.Id);
+                var menuItems = menuItemRepo.GetMenuItemsByOrderId(order.Id);
                 order.Tables = tables;
                 order.MenuItems = menuItems;
                 orders.Add(order);
@@ -399,35 +368,6 @@ namespace RelaxingKoala.Data
             }
         }
 
-        private List<MenuItem> GetMenuItemsById(Guid id)
-        {
-            using var conn = _dataSource.OpenConnection();
-            using var cmd = conn.CreateCommand();
-            cmd.CommandText = @"
-                SELECT m.id, m.title, m.cost, m.availability
-                FROM menuitem m
-                JOIN menuitem_order morder ON m.id = morder.menuItemId
-                WHERE morder.customer_orderId = @orderId;
-            ";
-
-            cmd.Parameters.AddWithValue("orderId", id);
-
-            List<MenuItem> menuItems = new List<MenuItem>();
-            var reader = cmd.ExecuteReader();
-            if (!reader.HasRows) return menuItems;
-
-            while (reader.Read())
-            {
-                menuItems.Add(new MenuItem()
-                {
-                    Id = reader.GetInt32("id"),
-                    Name = reader.GetString("title"),
-                    Cost = reader.GetInt32("cost"),
-                    Availability = reader.GetBoolean("availability")
-                });
-            }
-
-            return menuItems;
-        }
+        
     }
 }

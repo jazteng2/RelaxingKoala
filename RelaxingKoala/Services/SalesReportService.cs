@@ -1,8 +1,10 @@
-﻿using MySqlConnector;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using MySqlConnector;
 using RelaxingKoala.Data;
 using RelaxingKoala.Models;
 using RelaxingKoala.Models.Orders;
 using RelaxingKoala.Models.ViewModels;
+using System.Linq;
 
 namespace RelaxingKoala.Services
 {
@@ -27,16 +29,36 @@ namespace RelaxingKoala.Services
         {
             return invoiceRepo.GetByPeriod(startDate, endDate);
         }
-        
-        public int GetMenuItemSalesByPeriod(Guid menuItemId, DateOnly startDate, DateOnly endDate)
+
+        public SalesReportViewModel GetMenuItemSalesByPeriod(int menuItemId, DateOnly startDate, DateOnly endDate)
         {
-            int sales = 0;
-            var invoices = GetByPeriod(startDate, endDate);
-            
-            foreach (var i in invoices)
+            int salesCost = 0;
+            List<Invoice> correctInvoice = new List<Invoice>();
+            MenuItem itemSelected = menuItemRepo.GetById(menuItemId);
+
+            // Get invoices in period
+            List<Invoice> invoicesByPeriod = GetByPeriod(startDate, endDate);
+
+            // Get invoice where has menu item
+            foreach (var i in invoicesByPeriod)
             {
-                if (i.Order.MenuItems.)
+                List<MenuItem> orderMenuItems = i.Order.MenuItems;
+                var containItem = orderMenuItems.Where(m => m.Id == menuItemId);
+                if (containItem.Any())
+                {
+                    correctInvoice.Add(i);
+                }
             }
+
+            salesCost += itemSelected.Cost * correctInvoice.Count();
+
+            return new SalesReportViewModel()
+            {
+                MenuItem = itemSelected,
+                Invoices = correctInvoice,
+                TotalSalesCost = salesCost,
+                NumberOfSelection = correctInvoice.Count()
+            };
         }
     }
 }

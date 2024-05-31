@@ -12,7 +12,7 @@ namespace RelaxingKoala.Models.Orders
         public OrderType Type { get; set; }
         public List<Table> Tables { get; set; } = new List<Table>();
         public List<MenuItem> MenuItems { get; set; } = new List<MenuItem>();
-        public User? User { get; set; }
+        public User User { get; set; }
         public abstract Invoice Pay(IPaymentMethod method);
         public void RecalculateCost()
         {

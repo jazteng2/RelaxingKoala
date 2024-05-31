@@ -73,5 +73,36 @@ namespace RelaxingKoala.Data
             command.Parameters.AddWithValue("availability", table.Availability);
             command.ExecuteNonQuery();
         }
+
+        public List<Table> GetTablesByOrderId(Guid id)
+        {
+            using var conn = _dataSource.OpenConnection();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"
+                SELECT t.id, t.tablenumber, t.availability
+                FROM dineintable t
+                JOIN table_order torder ON t.id = torder.tableId
+                WHERE tOrder.customer_orderId = @orderId;
+            ";
+
+            cmd.Parameters.AddWithValue("orderId", id);
+
+            List<Table> tables = new List<Table>();
+            var reader = cmd.ExecuteReader();
+            if (!reader.HasRows) return tables;
+
+
+            while (reader.Read())
+            {
+                tables.Add(new Table()
+                {
+                    Id = reader.GetInt32("id"),
+                    Number = reader.GetInt32("tableNumber"),
+                    Availability = reader.GetBoolean("availability")
+                });
+            }
+
+            return tables;
+        }
     }
 }

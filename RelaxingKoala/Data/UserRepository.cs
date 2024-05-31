@@ -44,6 +44,16 @@ namespace RelaxingKoala.Data
                         Password = reader.GetString("password"),
                         Role = GetRole(reader.GetInt32("userRoleId"))
                     };
+                case (int)UserRole.Admin + 1:
+                    return new Admin()
+                    {
+                        Id = reader.GetGuid("id"),
+                        FirstName = reader.GetString("firstName"),
+                        LastName = reader.GetString("lastName"),
+                        Email = reader.GetString("email"),
+                        Password = reader.GetString("password"),
+                        Role = GetRole(reader.GetInt32("userRoleId"))
+                    };
                 default:
                     return new Customer();
             }
@@ -107,6 +117,16 @@ namespace RelaxingKoala.Data
                     };
                 case (int)UserRole.Staff + 1:
                     return new Staff()
+                    {
+                        Id = reader.GetGuid("id"),
+                        FirstName = reader.GetString("firstName"),
+                        LastName = reader.GetString("lastName"),
+                        Email = reader.GetString("email"),
+                        Password = reader.GetString("password"),
+                        Role = GetRole(reader.GetInt32("userRoleId"))
+                    };
+                case (int)UserRole.Admin + 1:
+                    return new Admin()
                     {
                         Id = reader.GetGuid("id"),
                         FirstName = reader.GetString("firstName"),

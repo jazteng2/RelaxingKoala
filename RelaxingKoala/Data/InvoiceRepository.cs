@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;
 using Microsoft.EntityFrameworkCore.Query;
 using MySqlConnector;
 using RelaxingKoala.Models;
@@ -144,7 +145,7 @@ namespace RelaxingKoala.Data
             cmd.Parameters.AddWithValue("startDate", start);
             cmd.Parameters.AddWithValue("endDate", end);
             var reader = cmd.ExecuteReader();
-            if (reader.HasRows) return new List<Invoice>();
+            if (!reader.HasRows) return new List<Invoice>();
             List<Invoice> list = new List<Invoice>();
             while (reader.Read())
             {
@@ -159,6 +160,45 @@ namespace RelaxingKoala.Data
                     UserId = reader.GetGuid("userId"),
                     OrderId = reader.GetGuid("orderId")
                 });
+            }
+            conn.Close();
+            for (int i = 0; i < list.Count(); i++)
+            {
+                var item = list[i];
+                list[i] = PopulateAssociations(item);
+            }
+            return list;
+        }
+
+        public List<Invoice> GetAll()
+        {
+            using var conn = _dataSource.OpenConnection();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"
+                SELECT * FROM invoice
+            ";
+            var reader = cmd.ExecuteReader();
+            if (!reader.HasRows) return new List<Invoice>();
+            List<Invoice> list = new List<Invoice>();
+            while (reader.Read())
+            {
+                list.Add(new Invoice()
+                {
+                    Id = reader.GetGuid("id"),
+                    CreatedDate = reader.GetDateOnly("createdDate"),
+                    TotalPay = reader.GetInt32("totalPay"),
+                    GivenPay = reader.GetInt32("givenpay"),
+                    ExcessPay = reader.GetInt32("excessPay"),
+                    PaymentMethod = GetPaymentMethod(reader.GetInt32("payMethodId")),
+                    UserId = reader.GetGuid("userId"),
+                    OrderId = reader.GetGuid("orderId")
+                });
+            }
+            conn.Close();
+            for (int i = 0; i < list.Count(); i++)
+            {
+                var item = list[i];
+                list[i] = PopulateAssociations(item);
             }
             return list;
         }
