@@ -1,16 +1,14 @@
 ﻿using MySqlConnector;
 using RelaxingKoala.Data;
-using RelaxingKoala.Models;
 using RelaxingKoala.Models.Orders;
-using System.Linq.Expressions;
-using System.Xml.Schema;
+using RelaxingKoala.Models;
 
 namespace RelaxingKoala.Services.PaymentStrategy
 {
-    public class CashPayment : IPaymentMethod
+    public class DigitalPayment : IPaymentMethod
     {
         private readonly InvoiceRepository invoiceRepo;
-        public CashPayment(MySqlDataSource dataSource)
+        public DigitalPayment(MySqlDataSource dataSource)
         {
             invoiceRepo = new InvoiceRepository(dataSource);
         }
@@ -22,9 +20,9 @@ namespace RelaxingKoala.Services.PaymentStrategy
                 Id = Guid.NewGuid(),
                 CreatedDate = DateOnly.FromDateTime(DateTime.Today),
                 TotalPay = order.Cost,
-                GivenPay = givenPay,
-                ExcessPay = order.Cost - givenPay,
-                PaymentMethod = PaymentMethod.Cash,
+                GivenPay = order.Cost,
+                ExcessPay = 0,
+                PaymentMethod = PaymentMethod.Card,
                 OrderId = order.Id,
                 UserId = order.UserId,
             };

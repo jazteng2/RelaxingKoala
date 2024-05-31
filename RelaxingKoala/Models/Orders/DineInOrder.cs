@@ -1,15 +1,18 @@
-﻿using RelaxingKoala.Services.PaymentStrategy;
+﻿using Microsoft.EntityFrameworkCore.Diagnostics;
+using RelaxingKoala.Services.PaymentStrategy;
+using System.Diagnostics;
 namespace RelaxingKoala.Models.Orders
 {
     public class DineInOrder : Order
     {
-        public override Invoice Pay(IPaymentMethod method)
+        public override bool Pay(IPaymentMethod method, int givenPay)
         {
             PaymentContext context = new PaymentContext();
             context.SetPaymentStrategy(method);
-            Invoice invoice = context.ProcessPayment();
+            bool payed = context.ProcessPayment(this, givenPay);
+            if (!payed) return false;
             State = OrderState.Payed;
-            return invoice;
+            return true;
         }
     }
 }

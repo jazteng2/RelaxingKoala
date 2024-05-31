@@ -1,4 +1,5 @@
 ﻿using RelaxingKoala.Models;
+using RelaxingKoala.Models.Orders;
 
 namespace RelaxingKoala.Services.PaymentStrategy
 {
@@ -9,9 +10,9 @@ namespace RelaxingKoala.Services.PaymentStrategy
         {
             _paymentMethod = paymentMethod;
         }
-        public Invoice ProcessPayment()
+        public bool ProcessPayment(IOrder order, int givenPay)
         {
-            return _paymentMethod.ProcessPayment();
+            return _paymentMethod.ProcessPayment(order, givenPay);
         }
     }
 }

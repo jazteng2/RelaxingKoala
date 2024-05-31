@@ -5,6 +5,6 @@ namespace RelaxingKoala.Services.PaymentStrategy
 {
     public interface IPaymentMethod
     {
-        public Invoice ProcessPayment();
+        public bool ProcessPayment(IOrder order, int givenPay);
     }
 }

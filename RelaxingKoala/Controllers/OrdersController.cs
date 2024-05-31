@@ -6,8 +6,7 @@ using RelaxingKoala.Data;
 using RelaxingKoala.Models;
 using RelaxingKoala.Models.Orders;
 using RelaxingKoala.Models.Users;
-using System;
-using System.Linq;
+using RelaxingKoala.Models.ViewModels;
 using System.Security.Claims;
 
 namespace RelaxingKoala.Controllers
@@ -242,8 +241,6 @@ namespace RelaxingKoala.Controllers
             return View(model);
         }
 
-
-
         // GET: Orders/Delete/5
         public IActionResult Delete(Guid id)
         {
@@ -275,6 +272,32 @@ namespace RelaxingKoala.Controllers
             {
                 return RedirectToAction(nameof(MyOrders), new { userId = order.UserId });
             }
+        }
+
+        [HttpGet]
+        public IActionResult PayOrder(Guid orderId)
+        {
+            Console.WriteLine(orderId);
+            return View(new PaymentViewModel() { Order = _orderRepository.GetById(orderId) });
+
+        }
+        [HttpPost, ActionName("PayOrder")]
+        public IActionResult PayOrder(PaymentViewModel model)
+        {
+            Console.Write("{0}", model.GivenPay);
+            if (ModelState.IsValid)
+            {
+                Console.WriteLine("{0}", model.GivenPay);
+            }
+            if (model.Order != null)
+            {
+                bool payed = model.Order.Pay(model.PaymentMethod, model.GivenPay);
+                if (payed)
+                {
+                    return RedirectToAction(nameof(MyOrders));
+                }
+            }
+            return View(model);
         }
     }
 }
