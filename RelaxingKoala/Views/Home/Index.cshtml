@@ -8,6 +8,8 @@
     @if (Model != null)
     {
         <h1 class="display-4">Welcome back @Model.FirstName</h1>
+        <br />
+        <br />
     }
     else
     {
@@ -30,21 +32,6 @@
 </div>
 
 <div class="container mt-5">
-    <div class="row">
-        <div class="col-md-4">
-            <h2>About Us</h2>
-            <p>Relaxing Koala Restaurant is dedicated to providing a unique dining experience with a focus on relaxation and quality. Our chefs use the freshest ingredients to create mouth-watering dishes that you will love.</p>
-        </div>
-        <div class="col-md-4">
-            <h2>Menu</h2>
-            <p>Check out our Menu. Enjoy discounts, combo deals, and exclusive offers available only at Relaxing Koala Restaurant. <a asp-area="" asp-controller="Offers" asp-action="Index">Learn more</a></p>
-        </div>
-        <div class="col-md-4">
-            <h2>Contact Us</h2>
-            <p>We would love to hear from you. Reach out to us for any inquiries, feedback, or reservations. You can contact us via phone, email, or visit our restaurant. <a asp-area="" asp-controller="Contact" asp-action="Index">Contact us</a></p>
-        </div>
-    </div>
-
     @* Other operations *@
     <div class="row mt-4">
         <div class="col-md-12 text-center">
@@ -58,15 +45,15 @@
                 }
                 else
                 {
-                    @* Customer Staff Admin *@
+                    @* Customer *@
                     <a class="btn btn-warning btn-lg" asp-area="" asp-controller="Reservations" asp-action="Index">Manage Reservations</a>
-                    <a class="btn btn-warning btn-lg" asp-area="" asp-controller="" asp-action="">Manage Orders</a>
+                    <a class="btn btn-warning btn-lg" asp-area="" asp-controller="Order" asp-action="">Manage Orders</a>
+                    <a class="btn btn-warning btn-lg" asp-area="" asp-controller="Invoice" asp-action="Index">Invoices</a>
 
                     @* Staff *@
                     if (Model.Role == UserRole.Staff || Model.Role == UserRole.Admin)
                     {
                         <a class="btn btn-warning btn-lg" asp-area="" asp-controller="Kitchen" asp-action="Index">Kitchen</a>
-                        <a class="btn btn-warning btn-lg" asp-area="" asp-controller="Invoice" asp-action="Index">Invoices</a>
                     }
 
                     @* Admin *@
@@ -76,6 +63,27 @@
                     }
                 }
             }
+        </div>
+    </div>
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <div class="row">
+        <div class="col-md-4">
+            <h2>About Us</h2>
+            <p>Relaxing Koala Restaurant is dedicated to providing a unique dining experience with a focus on relaxation and quality. Our chefs use the freshest ingredients to create mouth-watering dishes that you will love.</p>
+        </div>
+        <div class="col-md-4">
+            <h2>Menu</h2>
+            <p>Check out our Menu. Enjoy discounts, combo deals, and exclusive offers available only at Relaxing Koala Restaurant. <a asp-area="" asp-controller="Offers" asp-action="Index">Learn more</a></p>
+        </div>
+        <div class="col-md-4">
+            <h2>Contact Us</h2>
+            <p>We would love to hear from you. Reach out to us for any inquiries, feedback, or reservations. You can contact us via phone, email, or visit our restaurant. <a asp-area="" asp-controller="Contact" asp-action="Index">Contact us</a></p>
         </div>
     </div>
 </div>

@@ -1,0 +1,49 @@
+﻿@model List<RelaxingKoala.Models.Invoice>
+@using RelaxingKoala.Models
+@using RelaxingKoala.Models.Orders
+@using RelaxingKoala.Models.Users
+
+
+<h1>My Invoices</h1>
+@if (Model.Count > 0)
+{
+    @foreach (var i in Model.Select((value, index) => new { Index = index, value = value }))
+    {
+        Invoice invoice = i.value;
+        <br />
+        <section class="invoice-container">
+            <h2>Invoice - @invoice.CreatedDate</h2>
+            <div class="invoice-body">
+                @if (invoice.User != null && invoice.Order != null)
+                {
+                    User user = invoice.User;
+                    IOrder order = invoice.Order;
+
+                    @* Display User details*@
+                    <p><strong>User:</strong> @(invoice.User is not null ? $"{invoice.User.FirstName} {invoice.User.LastName}" : "")</p>
+
+                    <br />
+
+                    @* Display Order details *@
+                    <h4>Order Details</h4>
+                    <u>
+                        @foreach (MenuItem item in order.MenuItems)
+                        {
+                            <li>@item.Name<span class="item-cost">$@item.Cost</span></li>
+                        }
+                    </u>
+                }
+                <br />
+                <p class="payment-details"><strong>Total Cost:</strong> <span class="payment-detail">$@invoice.TotalPay</span></p>
+                <p class="payment-details"><strong>Amount Payed:</strong> <span class="payment-detail">$@invoice.GivenPay</span></p>
+                <p class="payment-details"><strong>Change:</strong> <span class="payment-detail">$@invoice.ExcessPay</span></p>
+                <p class="payment-details"><strong>Method:</strong> <span class="payment-detail">@invoice.PaymentMethod</span></p>
+            </div>
+        </section>
+        <br />
+    }
+}
+else
+{
+    <p>No invoices to display</p>
+}

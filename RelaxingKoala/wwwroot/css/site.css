@@ -20,3 +20,25 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+.invoice-container {
+    width: 500px;
+    border: solid black 1px;
+    padding: 20px;
+}
+
+.invoice-body p {
+    margin-bottom: 0;
+}
+
+.item-cost {
+    float: right;
+}
+
+.payment-details {
+    width: 460px;
+}
+
+.payment-detail {
+    float: right;
+}
