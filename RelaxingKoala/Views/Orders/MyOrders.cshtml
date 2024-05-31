@@ -1,7 +1,7 @@
 ﻿@model IEnumerable<RelaxingKoala.Models.Orders.IOrder>
 
 @{
-    ViewData["Title"] = "My Orders";
+    ViewData["Title"] = "Orders";
 }
 
 <h2>My Orders</h2>
@@ -15,6 +15,7 @@
             <th>Order Type</th>
             <th>Menu Items</th>
             <th>Tables</th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -31,6 +32,14 @@
                     {
                         @string.Join(", ", dineInOrder.Tables.Select(t => "Table " + t.Number))
                     }
+                    else
+                    {
+                        <span>N/A</span>
+                    }
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@order.Id" asp-route-origin="myorders" class="btn btn-primary">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@order.Id" asp-route-origin="myorders" class="btn btn-danger">Delete</a>
                 </td>
             </tr>
         }

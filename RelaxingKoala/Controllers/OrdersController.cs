@@ -130,6 +130,127 @@ namespace RelaxingKoala.Controllers
             var orders = _orderRepository.GetByUserId(userId);
             return View(orders);
         }
+
+        public IActionResult Edit(Guid id)
+        {
+            var order = _orderRepository.GetById(id);
+            if (order == null)
+            {
+                return NotFound();
+            }
+
+            var model = new OrderViewModel
+            {
+                UserId = order.UserId,
+                OrderTypeId = order.Type,
+                OrderStateId = order.State,
+                MenuItems = order.MenuItems.Select(mi => mi.Id).ToList(),
+                Tables = order is DineInOrder dineInOrder ? dineInOrder.Tables.Select(t => t.Id).ToList() : new List<int>()
+            };
+
+            ViewBag.OrderTypes = new SelectList(Enum.GetValues(typeof(OrderType)).Cast<OrderType>().Select(t => new SelectListItem
+            {
+                Value = ((int)t).ToString(),
+                Text = t.ToString()
+            }).ToList(), "Value", "Text");
+
+            ViewBag.OrderStates = new SelectList(Enum.GetValues(typeof(OrderState)).Cast<OrderState>().Select(s => new SelectListItem
+            {
+                Value = ((int)s).ToString(),
+                Text = s.ToString()
+            }).ToList(), "Value", "Text");
+
+            ViewBag.MenuItems = _menuItemRepository.GetAll().Select(m => new
+            {
+                Value = m.Id.ToString(),
+                Text = m.Name,
+                Cost = m.Cost
+            }).ToList();
+
+            ViewBag.Users = new SelectList(_userRepository.GetAll().Select(u => new SelectListItem
+            {
+                Value = u.Id.ToString(),
+                Text = u.FirstName + " " + u.LastName
+            }).ToList(), "Value", "Text");
+
+            ViewBag.Tables = _tableRepository.GetAvailableTables();
+
+            return View(model);
+        }
+
+        // POST: Orders/Edit/5
+        // POST: Orders/Edit/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(Guid id, [Bind("UserId,OrderTypeId,OrderStateId,MenuItems,Tables")] OrderViewModel model)
+        {
+            if (id == Guid.Empty || model == null)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                var order = _orderRepository.GetById(id);
+                if (order == null)
+                {
+                    return NotFound();
+                }
+
+                order.UserId = model.UserId;
+                order.State = model.OrderStateId;
+                order.Type = model.OrderTypeId;
+                order.MenuItems = _menuItemRepository.GetByIds(model.MenuItems);
+
+                if (model.OrderTypeId == OrderType.DineIn)
+                {
+                    order.Tables = model.Tables.Select(t => new Table { Id = t }).ToList();
+                }
+
+                order.RecalculateCost();
+                _orderRepository.Update(order);
+
+                var hardcodedUserId = new Guid("d840d48c-91b8-4a69-97b9-1b90a8ab3acf");
+                return RedirectToAction(nameof(MyOrders), new { userId = hardcodedUserId });
+            }
+
+            return View(model);
+        }
+
+
+
+        // GET: Orders/Delete/5
+        public IActionResult Delete(Guid id)
+        {
+            var order = _orderRepository.GetById(id);
+            if (order == null)
+            {
+                return NotFound();
+            }
+            return View(order);
+        }
+
+        // POST: Orders/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteConfirmed(Guid id, string origin)
+        {
+            var order = _orderRepository.GetById(id);
+            if (order == null)
+            {
+                return NotFound();
+            }
+            _orderRepository.Delete(id);
+
+            if (origin == "index")
+            {
+                return RedirectToAction(nameof(Index));
+            }
+            else
+            {
+                return RedirectToAction(nameof(MyOrders), new { userId = order.UserId });
+            }
+        }
     }
 }
     

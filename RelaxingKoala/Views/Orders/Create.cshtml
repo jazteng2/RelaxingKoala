@@ -9,16 +9,22 @@
 <form asp-action="Create" method="post">
     <div class="form-group">
         <label asp-for="UserId" class="control-label"></label>
-        <select asp-for="UserId" class="form-control" asp-items="ViewBag.Users"></select>
+        <select asp-for="UserId" class="form-control" id="userIdSelect"></select>
     </div>
     <div class="form-group">
-        <label asp-for="OrderTypeId" class="control-label"></label>
-        <select asp-for="OrderTypeId" class="form-control" asp-items="ViewBag.OrderTypes" id="orderTypeSelect"></select>
+        <label>Order Type</label>
+        <div class="form-check">
+            <input class="form-check-input" type="radio" asp-for="OrderTypeId" value="2" id="orderTypeDineIn">
+            <label class="form-check-label" for="orderTypeDineIn">Dine-In</label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="radio" asp-for="OrderTypeId" value="1" id="orderTypeTakeAway">
+            <label class="form-check-label" for="orderTypeTakeAway">Takeaway</label>
+        </div>
     </div>
-    <div class="form-group">
-        <label asp-for="OrderStateId" class="control-label"></label>
-        <select asp-for="OrderStateId" class="form-control" asp-items="ViewBag.OrderStates"></select>
-    </div>
+    @* Hidden input to hardcode OrderState to Confirmed *@
+    <input type="hidden" asp-for="OrderStateId" value="1" /> @* Assuming 1 is the ID for Confirmed *@
+
     <div class="form-group">
         <label>Menu Items</label>
         <div>
@@ -59,9 +65,13 @@
 @section Scripts {
     <script>
         $(document).ready(function () {
-            $('#orderTypeSelect').change(function () {
-                var selectedOrderType = $(this).val();
-                var dineInOrderType = "1";
+            // Set UserId dropdown to hardcoded value
+            var hardcodedUserId = "d840d48c-91b8-4a69-97b9-1b90a8ab3acf";
+            $('#userIdSelect').html('<option value="' + hardcodedUserId + '">' + hardcodedUserId + '</option>').val(hardcodedUserId);
+
+            $('input[name="OrderTypeId"]').change(function () {
+                var selectedOrderType = $('input[name="OrderTypeId"]:checked').val();
+                var dineInOrderType = "2"; // Ensure this matches the DineIn enum value
                 if (selectedOrderType == dineInOrderType) {
                     $('#tablesSection').show();
                 } else {

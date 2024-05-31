@@ -2,6 +2,7 @@
 using RelaxingKoala.Models;
 using RelaxingKoala.Models.Orders;
 using RelaxingKoala.Models.Users;
+using System;
 using System.Collections.Generic;
 
 namespace RelaxingKoala.Data
@@ -43,7 +44,7 @@ namespace RelaxingKoala.Data
                 SELECT t.id, t.tablenumber, t.availability
                 FROM dineintable t
                 JOIN table_order torder ON t.id = torder.tableId
-                WHERE tOrder.customer_orderId = @orderId;
+                WHERE torder.customer_orderId = @orderId;
             ";
             cmd.Parameters.AddWithValue("orderId", id.ToString());
 
@@ -54,7 +55,7 @@ namespace RelaxingKoala.Data
                 tables.Add(new Table()
                 {
                     Id = reader.GetInt32("id"),
-                    Number = reader.GetInt32("tableNumber"),
+                    Number = reader.GetInt32("tablenumber"),
                     Availability = reader.GetBoolean("availability")
                 });
             }
@@ -73,8 +74,8 @@ namespace RelaxingKoala.Data
             cmd.Parameters.AddWithValue("id", order.Id.ToString());
             cmd.Parameters.AddWithValue("cost", order.Cost);
             cmd.Parameters.AddWithValue("userId", order.UserId.ToString());
-            cmd.Parameters.AddWithValue("orderStateId", (int)order.State + 1);
-            cmd.Parameters.AddWithValue("orderTypeId", (int)order.Type + 1);
+            cmd.Parameters.AddWithValue("orderStateId", (int)order.State);
+            cmd.Parameters.AddWithValue("orderTypeId", (int)order.Type);
             cmd.ExecuteNonQuery();
 
             if (order.Tables.Count > 0)
@@ -97,7 +98,7 @@ namespace RelaxingKoala.Data
             {
                 cmd.Parameters.Clear();
                 cmd.CommandText = @"
-                    INSERT INTO menuItem_order (menuItemId, customer_orderId)
+                    INSERT INTO menuitem_order (menuItemId, customer_orderId)
                     VALUES (@menuItemId, @customer_orderId)
                 ";
                 foreach (var menuItem in order.MenuItems)
@@ -111,6 +112,7 @@ namespace RelaxingKoala.Data
             cmd.Transaction.Commit();
             conn.Close();
         }
+
         public List<IOrder> GetAll()
         {
             var orders = new List<IOrder>();
@@ -121,14 +123,13 @@ namespace RelaxingKoala.Data
             while (reader.Read())
             {
                 var order = GetOrderObject(reader);
-                var tables = GetTablesById(order.Id);
-                var menuItems = GetMenuItemsById(order.Id);
-                order.Tables = tables;
-                order.MenuItems = menuItems;
+                order.Tables = GetTablesById(order.Id);
+                order.MenuItems = GetMenuItemsById(order.Id);
                 orders.Add(order);
             }
             return orders;
         }
+
         public List<IOrder> GetAllByState(OrderState state)
         {
             using var conn = _dataSource.OpenConnection();
@@ -141,10 +142,8 @@ namespace RelaxingKoala.Data
             while (reader.Read())
             {
                 var order = GetOrderObject(reader);
-                var tables = GetTablesById(order.Id);
-                var menuItems = GetMenuItemsById(order.Id);
-                order.Tables = tables;
-                order.MenuItems = menuItems;
+                order.Tables = GetTablesById(order.Id);
+                order.MenuItems = GetMenuItemsById(order.Id);
                 orders.Add(order);
             }
 
@@ -161,10 +160,6 @@ namespace RelaxingKoala.Data
             return orders;
         }
 
-
-
-
-
         public bool Update(IOrder order)
         {
             using var conn = _dataSource.OpenConnection();
@@ -180,8 +175,8 @@ namespace RelaxingKoala.Data
                 WHERE id = @id
             ";
             cmd.Parameters.AddWithValue("cost", order.Cost);
-            cmd.Parameters.AddWithValue("state", (int)order.State + 1);
-            cmd.Parameters.AddWithValue("type", (int)order.Type + 1);
+            cmd.Parameters.AddWithValue("state", (int)order.State);
+            cmd.Parameters.AddWithValue("type", (int)order.Type);
             cmd.Parameters.AddWithValue("id", order.Id.ToString());
             affectedRows = cmd.ExecuteNonQuery();
             if (affectedRows == 0) return false;
@@ -230,13 +225,28 @@ namespace RelaxingKoala.Data
             return true;
         }
 
+
         public void Delete(Guid id)
         {
             using var conn = _dataSource.OpenConnection();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = @"DELETE FROM customer_order WHERE id = @id";
+
+            cmd.Transaction = conn.BeginTransaction();
+
+            // Delete related entries in table_order
+            cmd.CommandText = @"DELETE FROM table_order WHERE customer_orderId = @id";
             cmd.Parameters.AddWithValue("id", id.ToString());
             cmd.ExecuteNonQuery();
+
+            // Delete related entries in menuitem_order
+            cmd.CommandText = @"DELETE FROM menuitem_order WHERE customer_orderId = @id";
+            cmd.ExecuteNonQuery();
+
+            // Delete the customer_order entry
+            cmd.CommandText = @"DELETE FROM customer_order WHERE id = @id";
+            cmd.ExecuteNonQuery();
+
+            cmd.Transaction.Commit();
             conn.Close();
         }
 
@@ -251,10 +261,8 @@ namespace RelaxingKoala.Data
             while (reader.Read())
             {
                 var order = GetOrderObject(reader);
-                var tables = GetTablesById(order.Id);
-                var menuItems = GetMenuItemsById(order.Id);
-                order.Tables = tables;
-                order.MenuItems = menuItems;
+                order.Tables = GetTablesById(order.Id);
+                order.MenuItems = GetMenuItemsById(order.Id);
                 orders.Add(order);
             }
             return orders;
@@ -278,7 +286,6 @@ namespace RelaxingKoala.Data
             }
             return tables;
         }
-
 
         public List<MenuItem> GetAvailableMenuItems()
         {
@@ -305,7 +312,16 @@ namespace RelaxingKoala.Data
             var type = reader.GetInt32("orderTypeId");
             return type switch
             {
-                (int)OrderType.DineIn + 1 => new DineInOrder
+                (int)OrderType.DineIn => new DineInOrder
+                {
+                    Id = Guid.Parse(reader.GetString("id")),
+                    Cost = reader.GetInt32("cost"),
+                    UserId = Guid.Parse(reader.GetString("userId")),
+                    State = GetOrderState(reader.GetInt32("orderStateId")),
+                    Type = GetOrderType(type),
+                    Tables = GetTablesById(Guid.Parse(reader.GetString("id")))
+                },
+                (int)OrderType.TakeAway => new TakeAwayOrder
                 {
                     Id = Guid.Parse(reader.GetString("id")),
                     Cost = reader.GetInt32("cost"),
@@ -313,15 +329,7 @@ namespace RelaxingKoala.Data
                     State = GetOrderState(reader.GetInt32("orderStateId")),
                     Type = GetOrderType(type)
                 },
-                (int)OrderType.TakeAway + 1 => new TakeAwayOrder
-                {
-                    Id = Guid.Parse(reader.GetString("id")),
-                    Cost = reader.GetInt32("cost"),
-                    UserId = Guid.Parse(reader.GetString("userId")),
-                    State = GetOrderState(reader.GetInt32("orderStateId")),
-                    Type = GetOrderType(type)
-                },
-                (int)OrderType.Delivery + 1 => new DeliveryOrder
+                (int)OrderType.Delivery => new DeliveryOrder
                 {
                     Id = Guid.Parse(reader.GetString("id")),
                     Cost = reader.GetInt32("cost"),

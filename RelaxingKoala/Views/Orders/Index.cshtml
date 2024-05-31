@@ -1,10 +1,10 @@
 ﻿@model IEnumerable<RelaxingKoala.Models.Orders.IOrder>
 
 @{
-    ViewData["Title"] = "My Orders";
+    ViewData["Title"] = "Orders";
 }
 
-<h2>My Orders</h2>
+<h2>All Orders</h2>
 
 <table class="table">
     <thead>
@@ -34,8 +34,8 @@
                     }
                 </td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@order.Id" class="btn btn-primary">Edit</a>
-                    <a asp-action="Delete" asp-route-id="@order.Id" class="btn btn-danger">Delete</a>
+                    <a asp-action="Edit" asp-route-id="@order.Id" asp-route-origin="index" class="btn btn-primary">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@order.Id" asp-route-origin="index" class="btn btn-danger">Delete</a>
                 </td>
             </tr>
         }
