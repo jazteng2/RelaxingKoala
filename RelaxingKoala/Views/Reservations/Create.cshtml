@@ -10,7 +10,6 @@
     <div class="form-group">
         <label asp-for="ReservedDate" class="control-label"></label>
         <input asp-for="ReservedDate" class="form-control" id="ReservedDate" />
-        <span class="text-danger" id="reservedDateError" style="display:none;">Please select a valid reserved date in dd/mm/yyyy format.</span>
     </div>
     <div class="form-group">
         <label asp-for="StartTime" class="control-label"></label>
@@ -58,13 +57,7 @@
                 var numberOfPeople = $('#NumberOfPeople').val();
                 var selectedTables = $('#Tables option:selected').length;
 
-                var datePattern = /^([0-2][0-9]|(3)[0-1])\/([0-9]|(1)[0-2])\/\d{4}$/;
-                if (!reservedDate || !datePattern.test(reservedDate)) {
-                    $('#reservedDateError').show();
-                    valid = false;
-                } else {
-                    $('#reservedDateError').hide();
-                }
+               
 
                 if (!startTime) {
                     $('#startTimeError').show();
