@@ -69,6 +69,30 @@ namespace TestRelaxingKoala
             Assert.True(string.IsNullOrEmpty(u.FirstName));
         }
 
-        
+        [Fact]
+        public void TestInsert()
+        {
+            Admin u = new Admin()
+            {
+                Id = Guid.NewGuid(),
+                FirstName = "Admin",
+                LastName = "Boss",
+                Email = "admin@gmail.com",
+                Password = "admin",
+                Role = UserRole.Admin
+            };
+
+            Driver d = new Driver()
+            {
+                Id = Guid.NewGuid(),
+                FirstName = "Uber",
+                LastName = "Driver",
+                Email = "uber@gmail.com",
+                Password = "uber",
+                Role = UserRole.Driver
+            };
+            userRepo.Insert(u);
+            userRepo.Insert(d);
+        }
     }
 }
