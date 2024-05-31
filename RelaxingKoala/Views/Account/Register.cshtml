@@ -11,30 +11,104 @@
 <body>
     <div class="container mt-5">
         <h2>Register</h2>
-        <form asp-action="Register" method="post" class="mb-3">
+        <form asp-action="Register" method="post" class="mb-3" id="registerForm">
             <div class="form-group">
                 <label asp-for="FirstName" class="form-label"></label>
                 <input asp-for="FirstName" class="form-control" />
+                <span class="text-danger" id="firstNameError" style="display:none;">Please enter your first name.</span>
             </div>
             <div class="form-group">
                 <label asp-for="LastName" class="form-label"></label>
                 <input asp-for="LastName" class="form-control" />
+                <span class="text-danger" id="lastNameError" style="display:none;">Please enter your last name.</span>
             </div>
             <div class="form-group">
                 <label asp-for="Email" class="form-label"></label>
                 <input asp-for="Email" class="form-control" />
+                <span class="text-danger" id="emailError" style="display:none;">Please enter your email.</span>
             </div>
             <div class="form-group">
                 <label asp-for="Password" class="form-label"></label>
                 <input asp-for="Password" type="password" class="form-control" />
+                <span class="text-danger" id="passwordError" style="display:none;">Please enter your password.</span>
             </div>
             <div class="form-group">
                 <label asp-for="ConfirmPassword" class="form-label"></label>
                 <input asp-for="ConfirmPassword" type="password" class="form-control" />
+                <span class="text-danger" id="confirmPasswordError" style="display:none;">Please confirm your password.</span>
             </div>
-            <button type="submit" class="btn btn-primary">Register</button>
+            <button type="submit" class="btn btn-primary" id="registerButton">Register</button>
         </form>
     </div>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#registerButton').click(function (event) {
+                event.preventDefault();
+                var valid = true;
+
+                if (!$('#FirstName').val()) {
+                    $('#firstNameError').show();
+                    valid = false;
+                } else {
+                    $('#firstNameError').hide();
+                }
+
+                if (!$('#LastName').val()) {
+                    $('#lastNameError').show();
+                    valid = false;
+                } else {
+                    $('#lastNameError').hide();
+                }
+
+                if (!$('#Email').val()) {
+                    $('#emailError').show();
+                    valid = false;
+                } else {
+                    $('#emailError').hide();
+                }
+
+                if (!$('#Password').val()) {
+                    $('#passwordError').show();
+                    valid = false;
+                } else {
+                    $('#passwordError').hide();
+                }
+
+                if (!$('#ConfirmPassword').val()) {
+                    $('#confirmPasswordError').show();
+                    valid = false;
+                } else {
+                    $('#confirmPasswordError').hide();
+                }
+
+                if (valid) {
+                    // Proceed with form submission if valid
+                    $('#registerForm').submit();
+                }
+            });
+
+            // Hide errors on input change
+            $('#FirstName').change(function () {
+                $('#firstNameError').hide();
+            });
+
+            $('#LastName').change(function () {
+                $('#lastNameError').hide();
+            });
+
+            $('#Email').change(function () {
+                $('#emailError').hide();
+            });
+
+            $('#Password').change(function () {
+                $('#passwordError').hide();
+            });
+
+            $('#ConfirmPassword').change(function () {
+                $('#confirmPasswordError').hide();
+            });
+        });
+    </script>
 </body>
 </html>

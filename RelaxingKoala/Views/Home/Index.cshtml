@@ -46,14 +46,16 @@
                 else
                 {
                     @* Customer *@
-                    <a class="btn btn-warning btn-lg" asp-area="" asp-controller="Reservations" asp-action="Index">Manage Reservations</a>
-                    <a class="btn btn-warning btn-lg" asp-area="" asp-controller="Orders" asp-action="">Manage Orders</a>
-                    <a class="btn btn-warning btn-lg" asp-area="" asp-controller="Invoice" asp-action="Index">Invoices</a>
+                    <a class="btn btn-warning btn-lg" asp-area="" asp-controller="Reservations" asp-action="MyReservations">My Reservations</a>
+                    <a class="btn btn-warning btn-lg" asp-area="" asp-controller="Orders" asp-action="MyOrders">My Orders</a>
+                    <a class="btn btn-warning btn-lg" asp-area="" asp-controller="Invoice" asp-action="Index">My Invoices</a>
 
                     @* Staff *@
                     if (Model.Role == UserRole.Staff || Model.Role == UserRole.Admin)
                     {
                         <a class="btn btn-warning btn-lg" asp-area="" asp-controller="Kitchen" asp-action="Index">Kitchen</a>
+                        <a class="btn btn-warning btn-lg" asp-area="" asp-controller="SalesReport" asp-action="Index">View Sales</a>
+
                     }
 
                     @* Admin *@

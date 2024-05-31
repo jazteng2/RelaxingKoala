@@ -1,6 +1,8 @@
 ﻿using MySqlConnector;
 using RelaxingKoala.Models.Orders;
 using RelaxingKoala.Models.Users;
+using System;
+using System.Collections.Generic;
 
 namespace RelaxingKoala.Data
 {
@@ -29,50 +31,15 @@ namespace RelaxingKoala.Data
             return users;
         }
 
-        public User GetByEmail(string id)
+        public User GetByEmail(string email)
         {
             using var conn = _dataSource.OpenConnection();
             using var cmd = conn.CreateCommand();
             cmd.CommandText = @"SELECT * FROM user WHERE email = @Email";
-            cmd.Parameters.AddWithValue("@Email", id);
+            cmd.Parameters.AddWithValue("@Email", email);
             var reader = cmd.ExecuteReader();
             if (!reader.Read()) return new Customer();
-            var role = reader.GetInt32("userRoleId");
-            switch (role)
-            {
-                case (int)UserRole.Customer + 1:
-                    return new Customer()
-                    {
-                        Id = reader.GetGuid("id"),
-                        FirstName = reader.GetString("firstName"),
-                        LastName = reader.GetString("lastName"),
-                        Email = reader.GetString("email"),
-                        Password = reader.GetString("password"),
-                        Role = GetRole(reader.GetInt32("userRoleId"))
-                    };
-                case (int)UserRole.Staff + 1:
-                    return new Staff()
-                    {
-                        Id = reader.GetGuid("id"),
-                        FirstName = reader.GetString("firstName"),
-                        LastName = reader.GetString("lastName"),
-                        Email = reader.GetString("email"),
-                        Password = reader.GetString("password"),
-                        Role = GetRole(reader.GetInt32("userRoleId"))
-                    };
-                case (int)UserRole.Admin + 1:
-                    return new Admin()
-                    {
-                        Id = reader.GetGuid("id"),
-                        FirstName = reader.GetString("firstName"),
-                        LastName = reader.GetString("lastName"),
-                        Email = reader.GetString("email"),
-                        Password = reader.GetString("password"),
-                        Role = GetRole(reader.GetInt32("userRoleId"))
-                    };
-                default:
-                    return new Customer();
-            }
+            return GetUserObject(reader);
         }
 
         public User GetById(Guid? id)
@@ -81,7 +48,7 @@ namespace RelaxingKoala.Data
             using var conn = _dataSource.OpenConnection();
             using var cmd = conn.CreateCommand();
             cmd.CommandText = @"SELECT * FROM user WHERE id = @id";
-            cmd.Parameters.AddWithValue("id", id);
+            cmd.Parameters.AddWithValue("id", id.ToString());
             var reader = cmd.ExecuteReader();
             if (!reader.Read()) return new Customer();
             return GetUserObject(reader);
@@ -95,14 +62,14 @@ namespace RelaxingKoala.Data
                 INSERT INTO user (id, firstName, lastName, email, password, userRoleId)
                 VALUES (@id, @firstName, @lastName, @email, @password, @userRoleId);
             ";
-            cmd.Parameters.AddWithValue("id", user.Id);
+            cmd.Parameters.AddWithValue("id", user.Id.ToString());
             cmd.Parameters.AddWithValue("firstName", user.FirstName);
             cmd.Parameters.AddWithValue("lastName", user.LastName);
             cmd.Parameters.AddWithValue("email", user.Email);
             cmd.Parameters.AddWithValue("password", user.Password);
             cmd.Parameters.AddWithValue("userRoleId", (int)user.Role + 1);
             var affectedRows = cmd.ExecuteNonQuery();
-            return affectedRows > 0 ? true : false;
+            return affectedRows > 0;
         }
 
         public UserRole GetRole(int id)
@@ -118,43 +85,57 @@ namespace RelaxingKoala.Data
 
         public User GetUserObject(MySqlDataReader reader)
         {
-            var role = reader.GetInt32("userRoleId");
+            var roleString = reader.GetString("userRoleId");
+            if (!int.TryParse(roleString, out int role))
+            {
+                role = (int)UserRole.Customer; // Default to Customer if conversion fails
+            }
+
+            Guid userId = Guid.Parse(reader.GetString("id"));
+
             switch (role)
             {
                 case (int)UserRole.Customer + 1:
                     return new Customer()
                     {
-                        Id = reader.GetGuid("id"),
+                        Id = userId,
                         FirstName = reader.GetString("firstName"),
                         LastName = reader.GetString("lastName"),
                         Email = reader.GetString("email"),
                         Password = reader.GetString("password"),
-                        Role = GetRole(reader.GetInt32("userRoleId"))
+                        Role = GetRole(role)
                     };
                 case (int)UserRole.Staff + 1:
                     return new Staff()
                     {
-                        Id = reader.GetGuid("id"),
+                        Id = userId,
                         FirstName = reader.GetString("firstName"),
                         LastName = reader.GetString("lastName"),
                         Email = reader.GetString("email"),
                         Password = reader.GetString("password"),
-                        Role = GetRole(reader.GetInt32("userRoleId"))
+                        Role = GetRole(role)
                     };
                 case (int)UserRole.Admin + 1:
                     return new Admin()
                     {
-                        Id = reader.GetGuid("id"),
+                        Id = userId,
                         FirstName = reader.GetString("firstName"),
                         LastName = reader.GetString("lastName"),
                         Email = reader.GetString("email"),
                         Password = reader.GetString("password"),
-                        Role = GetRole(reader.GetInt32("userRoleId"))
+                        Role = GetRole(role)
                     };
                 default:
-                    return new Customer();
+                    return new Customer()
+                    {
+                        Id = userId,
+                        FirstName = reader.GetString("firstName"),
+                        LastName = reader.GetString("lastName"),
+                        Email = reader.GetString("email"),
+                        Password = reader.GetString("password"),
+                        Role = GetRole(role)
+                    };
             }
         }
     }
 }
-

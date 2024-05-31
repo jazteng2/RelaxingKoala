@@ -6,36 +6,122 @@
 
 <h2>Make a Reservation</h2>
 
-<form asp-action="Create" method="post">
+<form asp-action="Create" method="post" id="reservationForm">
     <div class="form-group">
         <label asp-for="ReservedDate" class="control-label"></label>
-        <input asp-for="ReservedDate" class="form-control" />
+        <input asp-for="ReservedDate" class="form-control" id="ReservedDate" />
+        <span class="text-danger" id="reservedDateError" style="display:none;">Please select a valid reserved date in dd/mm/yyyy format.</span>
     </div>
     <div class="form-group">
         <label asp-for="StartTime" class="control-label"></label>
-        <input asp-for="StartTime" class="form-control" />
+        <input asp-for="StartTime" class="form-control" id="StartTime" />
+        <span class="text-danger" id="startTimeError" style="display:none;">Please enter a start time.</span>
     </div>
     <div class="form-group">
         <label asp-for="EndTime" class="control-label"></label>
-        <input asp-for="EndTime" class="form-control" />
+        <input asp-for="EndTime" class="form-control" id="EndTime" />
+        <span class="text-danger" id="endTimeError" style="display:none;">Please enter an end time.</span>
     </div>
     <div class="form-group">
         <label asp-for="NumberOfPeople" class="control-label"></label>
-        <input asp-for="NumberOfPeople" class="form-control" />
+        <input asp-for="NumberOfPeople" class="form-control" id="NumberOfPeople" />
+        <span class="text-danger" id="numberOfPeopleError" style="display:none;">Please enter the number of people.</span>
     </div>
-        <input asp-for="UserId" class="form-control" type="hidden" value="@Model.UserId"/>
+    <input asp-for="UserId" class="form-control" type="hidden" value="@Model.UserId" />
     <div class="form-group">
         <label asp-for="Tables" class="control-label"></label>
-        <select asp-for="Tables" class="form-control" multiple="multiple">
+        <select asp-for="Tables" class="form-control" multiple="multiple" id="Tables">
             @foreach (var table in ViewBag.Tables)
             {
                 <option value="@table.Id">@table.Number</option>
             }
         </select>
+        <span class="text-danger" id="tablesError" style="display:none;">Please select at least one table.</span>
     </div>
     <div class="form-group">
-        <input type="submit" value="Create" class="btn btn-primary" />
+        <input type="submit" value="Create" class="btn btn-primary" id="createButton" />
     </div>
 </form>
 
 <a href="@Url.Action("MyReservations", "Reservations")" class="btn btn-secondary">Manage My Reservations</a>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#createButton').click(function (event) {
+                event.preventDefault();
+                var valid = true;
+
+                var reservedDate = $('#ReservedDate').val();
+                var startTime = $('#StartTime').val();
+                var endTime = $('#EndTime').val();
+                var numberOfPeople = $('#NumberOfPeople').val();
+                var selectedTables = $('#Tables option:selected').length;
+
+                var datePattern = /^([0-2][0-9]|(3)[0-1])\/([0-9]|(1)[0-2])\/\d{4}$/;
+                if (!reservedDate || !datePattern.test(reservedDate)) {
+                    $('#reservedDateError').show();
+                    valid = false;
+                } else {
+                    $('#reservedDateError').hide();
+                }
+
+                if (!startTime) {
+                    $('#startTimeError').show();
+                    valid = false;
+                } else {
+                    $('#startTimeError').hide();
+                }
+
+                if (!endTime) {
+                    $('#endTimeError').show();
+                    valid = false;
+                } else {
+                    $('#endTimeError').hide();
+                }
+
+                if (!numberOfPeople) {
+                    $('#numberOfPeopleError').show();
+                    valid = false;
+                } else {
+                    $('#numberOfPeopleError').hide();
+                }
+
+                if (selectedTables === 0) {
+                    $('#tablesError').show();
+                    valid = false;
+                } else {
+                    $('#tablesError').hide();
+                }
+
+                if (valid) {
+                    // Proceed with form submission if valid
+                    $('#reservationForm').submit();
+                }
+            });
+
+            // Hide errors on input change
+            $('#ReservedDate').change(function () {
+                $('#reservedDateError').hide();
+            });
+
+            $('#StartTime').change(function () {
+                $('#startTimeError').hide();
+            });
+
+            $('#EndTime').change(function () {
+                $('#endTimeError').hide();
+            });
+
+            $('#NumberOfPeople').change(function () {
+                $('#numberOfPeopleError').hide();
+            });
+
+            $('#Tables').change(function () {
+                if ($('#Tables option:selected').length > 0) {
+                    $('#tablesError').hide();
+                }
+            });
+        });
+    </script>
+}

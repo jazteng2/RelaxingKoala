@@ -14,7 +14,7 @@ namespace RelaxingKoala.Models.Orders
         [Required]
         public OrderState OrderStateId { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "At least one menu item must be selected.")]
         public List<int> MenuItems { get; set; }
 
         public List<int> Tables { get; set; } = new List<int>();

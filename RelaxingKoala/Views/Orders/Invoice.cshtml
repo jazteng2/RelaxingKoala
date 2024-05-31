@@ -1,0 +1,30 @@
+﻿@model RelaxingKoala.Models.Orders.IOrder
+
+@{
+    ViewBag.Title = "Invoice";
+}
+
+<h2>Invoice</h2>
+
+<div>
+    <h3>Order Summary</h3>
+    <p><strong>Order ID:</strong> @Model.Id</p>
+    <p><strong>Cost:</strong> @Model.Cost</p>
+    <p><strong>Order State:</strong> @Model.State</p>
+    <p><strong>Order Type:</strong> @Model.Type</p>
+    <p><strong>Menu Items:</strong> @string.Join(", ", Model.MenuItems.Select(mi => mi.Name))</p>
+
+    @if (Model is RelaxingKoala.Models.Orders.DineInOrder dineInOrder)
+    {
+        <p><strong>Tables:</strong> @string.Join(", ", dineInOrder.Tables.Select(t => "Table " + t.Number))</p>
+    }
+
+
+    <p><strong>Address Line: </strong> Unit1/72 Cramer Street, Preston @ViewBag.AddressLine</p>
+        <p><strong>Postcode:</strong> 3072 @ViewBag.Postcode</p>
+    
+</div>
+
+<div>
+    <a asp-action="MyOrders" asp-route-userId="@Model.UserId" class="btn btn-primary">Back to My Orders</a>
+</div>

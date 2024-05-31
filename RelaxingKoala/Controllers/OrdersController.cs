@@ -106,7 +106,7 @@ namespace RelaxingKoala.Controllers
 
                 order.RecalculateCost();
                 _orderRepository.Insert(order);
-                return RedirectToAction(nameof(MyOrders), new { userId = model.UserId });
+                return RedirectToAction(nameof(Invoice), new { orderId = order.Id });
             }
 
             ViewBag.OrderTypes = new SelectList(Enum.GetValues(typeof(OrderType)).Cast<OrderType>().Select(t => new SelectListItem
@@ -298,6 +298,17 @@ namespace RelaxingKoala.Controllers
                 }
             }
             return View(model);
+        }
+
+        public IActionResult Invoice(Guid orderId)
+        {
+            var order = _orderRepository.GetById(orderId);
+            if (order == null)
+            {
+                return NotFound();
+            }
+
+            return View(order);
         }
     }
 }

@@ -6,15 +6,12 @@
 
 <h2>Create Order</h2>
 
-<form asp-action="Create" method="post">
-    <input asp-for="UserId" class="form-control" asp-items="@Model.UserId" type="hidden"/>
+<form asp-action="Create" method="post" id="createOrderForm">
+    <input asp-for="UserId" class="form-control" asp-items="@Model.UserId" type="hidden" />
+    <input asp-for="OrderStateId" type="hidden" value="3" />
     <div class="form-group">
         <label asp-for="OrderTypeId" class="control-label"></label>
         <select asp-for="OrderTypeId" class="form-control" asp-items="ViewBag.OrderTypes" id="orderTypeSelect"></select>
-    </div>
-    <div class="form-group">
-        <label asp-for="OrderStateId" class="control-label"></label>
-        <select asp-for="OrderStateId" class="form-control" asp-items="ViewBag.OrderStates"></select>
     </div>
     <div class="form-group">
         <label>Menu Items</label>
@@ -29,6 +26,7 @@
                 </div>
             }
         </div>
+        <span class="text-danger" id="menuItemsError" style="display:none;">Please select at least one menu item.</span>
     </div>
     <div class="form-group" id="tablesSection">
         <label>Available Tables</label>
@@ -44,12 +42,33 @@
             }
         </div>
     </div>
+    <div class="form-group" id="deliverySection" style="display:none;">
+        <label for="addressLine">Address Line</label>
+        <input type="text" class="form-control" id="addressLine" />
+        <span class="text-danger" id="addressLineError" style="display:none;">Please enter the address line.</span>
+        <label for="postcode">Postcode</label>
+        <input type="text" class="form-control" id="postcode" />
+        <span class="text-danger" id="postcodeError" style="display:none;">Please enter the postcode.</span>
+    </div>
+    <div class="form-group">
+        <label>Payment Method</label>
+        <select class="form-control" id="paymentMethod">
+            <option value="cash">Cash</option>
+            <option value="card">Card</option>
+            <option value="digital">Digital</option>
+        </select>
+    </div>
+    <div class="form-group" id="enterValueSection" style="display:none;">
+        <label for="customerValue">Enter Value</label>
+        <input type="number" class="form-control" id="customerValue" min="0" step="0.01" />
+        <span class="text-danger" id="customerValueError" style="display:none;">Please enter a valid value.</span>
+    </div>
     <div class="form-group">
         <label>Total Cost: </label>
         <span id="total-cost">@Model.Cost</span>
     </div>
     <div class="form-group">
-        <input type="submit" value="Create" class="btn btn-primary" />
+        <input type="submit" value="Pay" class="btn btn-primary" id="payButton" />
     </div>
 </form>
 
@@ -59,11 +78,24 @@
             $('#orderTypeSelect').change(function () {
                 var selectedOrderType = $(this).val();
                 var dineInOrderType = "0";
-                console.log(selectedOrderType);
-                if (selectedOrderType != dineInOrderType) {
-                    $('#tablesSection').hide();
-                } else {
+                var deliveryOrderType = "2"; // Assuming 2 is the value for Delivery
+                if (selectedOrderType == dineInOrderType) {
                     $('#tablesSection').show();
+                    $('#deliverySection').hide();
+                } else if (selectedOrderType == deliveryOrderType) {
+                    $('#tablesSection').hide();
+                    $('#deliverySection').show();
+                } else {
+                    $('#tablesSection').hide();
+                    $('#deliverySection').hide();
+                }
+            });
+
+            $('#paymentMethod').change(function () {
+                if ($(this).val() === 'cash') {
+                    $('#enterValueSection').show();
+                } else {
+                    $('#enterValueSection').hide();
                 }
             });
 
@@ -73,7 +105,83 @@
                     totalCost += parseFloat($(this).data('cost'));
                 });
                 $('#total-cost').text(totalCost);
+                $('#menuItemsError').hide(); // Hide the error message when a checkbox is checked
             });
+
+            $('#payButton').click(function (event) {
+                event.preventDefault();
+                var totalCost = parseFloat($('#total-cost').text());
+                var paymentMethod = $('#paymentMethod').val();
+                var valid = true;
+
+                // Check if at least one menu item is selected
+                if ($('.menu-item-checkbox:checked').length === 0) {
+                    $('#menuItemsError').show();
+                    valid = false;
+                } else {
+                    $('#menuItemsError').hide();
+                }
+
+                if (paymentMethod === 'cash') {
+                    var customerValue = parseFloat($('#customerValue').val());
+                    if (isNaN(customerValue) || customerValue < totalCost) {
+                        $('#customerValueError').show();
+                        valid = false;
+                    } else {
+                        $('#customerValueError').hide();
+                        var balance = customerValue - totalCost;
+                        alert('Payment made of ' + totalCost + ', and ' + balance + ' balance has been returned.');
+                    }
+                } else {
+                    $('#customerValueError').hide();
+                    alert('Payment made of ' + totalCost);
+                }
+
+                // Check delivery fields if Delivery is selected
+                var selectedOrderType = $('#orderTypeSelect').val();
+                if (selectedOrderType == "2") {
+                    var addressLine = $('#addressLine').val();
+                    var postcode = $('#postcode').val();
+                    if (!addressLine) {
+                        $('#addressLineError').show();
+                        valid = false;
+                    } else {
+                        $('#addressLineError').hide();
+                    }
+
+                    if (!postcode) {
+                        $('#postcodeError').show();
+                        valid = false;
+                    } else {
+                        $('#postcodeError').hide();
+                    }
+                }
+
+                if (valid) {
+                    // Proceed with form submission if valid
+                    $('form').submit();
+                }
+            });
+
+            // Initial check to show/hide sections based on the default order type
+            var initialOrderType = $('#orderTypeSelect').val();
+            if (initialOrderType == "0") {
+                $('#tablesSection').show();
+                $('#deliverySection').hide();
+            } else if (initialOrderType == "2") {
+                $('#tablesSection').hide();
+                $('#deliverySection').show();
+            } else {
+                $('#tablesSection').hide();
+                $('#deliverySection').hide();
+            }
+
+            // Initial check to show/hide enter value section based on the default payment method
+            if ($('#paymentMethod').val() === 'cash') {
+                $('#enterValueSection').show();
+            } else {
+                $('#enterValueSection').hide();
+            }
         });
     </script>
 }

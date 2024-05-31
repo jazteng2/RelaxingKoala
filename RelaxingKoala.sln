@@ -5,7 +5,7 @@ VisualStudioVersion = 17.9.34728.123
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RelaxingKoala", "RelaxingKoala\RelaxingKoala.csproj", "{D6431263-5944-4929-944D-9FBE27FF2F2F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestRelaxingKoala", "TestRelaxingKoala\TestRelaxingKoala.csproj", "{40242CC1-1EF4-41EF-8A1A-38551687952B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestRelaxingKoala", "TestRelaxingKoala\TestRelaxingKoala.csproj", "{40242CC1-1EF4-41EF-8A1A-38551687952B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

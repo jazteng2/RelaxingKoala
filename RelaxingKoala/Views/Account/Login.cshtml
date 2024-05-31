@@ -19,22 +19,54 @@
         }
         else
         {
-            <form asp-action="Login" method="post" class="mb-3">
+            <form asp-action="Login" method="post" class="mb-3" id="loginForm">
                 <div class="form-group">
                     <label asp-for="Email" class="form-label"></label>
                     <input asp-for="Email" class="form-control" />
+                    <span class="text-danger" id="emailError" style="display:none;">Please enter your email.</span>
                 </div>
                 <div class="form-group">
                     <label asp-for="Password" class="form-label"></label>
                     <input asp-for="Password" type="password" class="form-control" />
+                    <span class="text-danger" id="passwordError" style="display:none;">Please enter your password.</span>
                 </div>
-                <button type="submit" class="btn btn-primary">Login</button>
+                <button type="submit" class="btn btn-primary" id="loginButton">Login</button>
             </form>
             <a href="@Url.Action("Register", "Account")" class="btn btn-secondary">Sign Up for Customer</a>
             <a href="@Url.Action("Register", "Account")" class="btn btn-secondary">Register as Staff/Admin</a>
-
         }
     </div>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-</html>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#loginButton').click(function (event) {
+                event.preventDefault();
+                var valid = true;
+
+                if (!$('#Email').val()) {
+                    $('#emailError').show();
+                    valid = false;
+                } else {
+                    $('#emailError').hide();
+                }
+
+                if (!$('#Password').val()) {
+                    $('#passwordError').show();
+                    valid = false;
+                } else {
+                    $('#passwordError').hide();
+                }
+
+                if (valid) {
+                    // Proceed with form submission if valid
+                    $('#loginForm').submit();
+                }
+            });
+
+            // Hide errors on input change
+            $('#Email').change(function () {
+                $('#emailError').hide();
+            });
+
+            $('#Password').cha
