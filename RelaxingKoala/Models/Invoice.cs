@@ -14,5 +14,7 @@ namespace RelaxingKoala.Models
         public PaymentMethod PaymentMethod { get; set; }
         public Guid OrderId { get; set; }
         public Guid UserId { get; set; }
+        public IOrder? Order { get; set; }
+        public User? User { get; set; }
     }
 }
