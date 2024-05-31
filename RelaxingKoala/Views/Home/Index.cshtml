@@ -25,8 +25,8 @@
         if (Model.Role != UserRole.Driver)
         {
             <a class="btn btn-primary btn-lg" asp-area="" asp-controller="Reservations" asp-route-id="@Model.Id" asp-action="Create">Make a Reservation</a>
-            <a class="btn btn-secondary btn-lg" asp-area="" asp-controller="" asp-action="">Make an Order</a>
             <a class="btn btn-secondary btn-lg" asp-area="" asp-controller="Menu" asp-action="Index">View Menu</a>
+            <a class="btn btn-secondary btn-lg" asp-area="" asp-controller="Orders" asp-action="Create">Make an Order</a>
         }
     }
 </div>
