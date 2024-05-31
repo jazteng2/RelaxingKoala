@@ -9,7 +9,8 @@ namespace RelaxingKoala.Models
 
         // Relationships
         public Guid DriverId { get; set; }
-        public required Driver Driver { get; set; }
-        public List<DeliveryOrder> Orders { get; set; } = new List<DeliveryOrder>();
+        public Guid OrderId { get; set; }
+        public Driver Driver { get; set; } = new Driver();
+        public IOrder? Order { get; set; }
     }
 }

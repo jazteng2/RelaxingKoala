@@ -1,4 +1,4 @@
-﻿@model RelaxingKoala.Models.Orders.IOrder
+﻿@model RelaxingKoala.Models.Orders.OrderViewModel
 
 @{
     ViewData["Title"] = "Edit Order";
@@ -7,46 +7,34 @@
 <h2>Edit Order</h2>
 
 <form asp-action="Edit" method="post">
-    <input type="hidden" asp-for="Id" />
     <div class="form-group">
-        <label asp-for="Cost" class="control-label"></label>
-        <input asp-for="Cost" class="form-control" />
-    </div>
-    <div class="form-group">
-        <label asp-for="State" class="control-label"></label>
-        <select asp-for="State" class="form-control">
-            @foreach (var state in Enum.GetValues(typeof(RelaxingKoala.Models.Orders.OrderState)))
+        <label asp-for="OrderTypeId" class="control-label"></label>
+        <select asp-for="OrderTypeId" class="form-control" asp-items="ViewBag.OrderTypes" id="orderTypeSelect">
+            @foreach (var item in ViewBag.OrderTypes)
             {
-                //<option value="@state" @(Model.State == (RelaxingKoala.Models.Orders.OrderState)state ? "selected" : "")>@state</option>
+                <option value="@item.Value" selected="@(Model.OrderTypeId == (RelaxingKoala.Models.Orders.OrderType)int.Parse(item.Value) ? "selected" : null)">@item.Text</option>
             }
         </select>
     </div>
     <div class="form-group">
-        <label asp-for="Type" class="control-label"></label>
-        <select asp-for="Type" class="form-control">
-            @foreach (var type in Enum.GetValues(typeof(RelaxingKoala.Models.Orders.OrderType)))
-            {
-                //<option value="@type" @(Model.Type == (RelaxingKoala.Models.Orders.OrderType)type ? "selected" : "")>@type</option>
-            }
-        </select>
-    </div>
-    <div class="form-group">
-        <label asp-for="Tables" class="control-label"></label>
-        <select asp-for="Tables" class="form-control" multiple="multiple">
-            @foreach (var table in ViewBag.Tables)
-            {
-                var selected = Model.Tables.Any(t => t.Id == table.Id) ? "selected" : "";
-                //<option value="@table.Id" @selected>@table.Number</option>
-            }
-        </select>
+        <label asp-for="OrderStateId" class="control-label"></label>
+        <select asp-for="OrderStateId" class="form-control" asp-items="ViewBag.OrderStates"></select>
     </div>
     <div class="form-group">
         <label asp-for="MenuItems" class="control-label"></label>
         <select asp-for="MenuItems" class="form-control" multiple="multiple">
-            @foreach (var menuItem in ViewBag.MenuItems)
+            @foreach (var item in ViewBag.MenuItems)
             {
-                var selected = Model.MenuItems.Any(mi => mi.Id == menuItem.Id) ? "selected" : "";
-                //<option value="@menuItem.Id" @selected>@menuItem.Name</option>
+                <option value="@item.Value" selected="@(Model.MenuItems.Contains(int.Parse(item.Value)) ? "selected" : null)">@item.Text - @item.Cost</option>
+            }
+        </select>
+    </div>
+    <div class="form-group" id="tablesSection" style="display: @(Model.OrderTypeId == RelaxingKoala.Models.Orders.OrderType.DineIn ? "block" : "none");">
+        <label asp-for="Tables" class="control-label"></label>
+        <select asp-for="Tables" class="form-control" multiple="multiple">
+            @foreach (var table in ViewBag.Tables)
+            {
+                <option value="@table.Id" selected="@(Model.Tables.Contains(table.Id) ? "selected" : null)">Table @table.Number</option>
             }
         </select>
     </div>
@@ -54,3 +42,23 @@
         <input type="submit" value="Save" class="btn btn-primary" />
     </div>
 </form>
+
+<div>
+    <a asp-action="MyOrders" asp-route-userId="@Model.UserId">Back to List</a>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#orderTypeSelect').change(function () {
+                var selectedOrderType = $(this).val();
+                var dineInOrderType = "2"; // Ensure this matches the DineIn enum value
+                if (selectedOrderType == dineInOrderType) {
+                    $('#tablesSection').show();
+                } else {
+                    $('#tablesSection').hide();
+                }
+            });
+        });
+    </script>
+}

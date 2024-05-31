@@ -281,9 +281,13 @@ namespace RelaxingKoala.Data
             using var conn = _dataSource.OpenConnection();
             using var cmd = conn.CreateCommand();
             cmd.CommandText = @"
-                DELETE FROM customer_order WHERE id = @id
+                DELETE FROM menuitem_order WHERE customer_orderId = @id;
+                DElETE FROM table_order WHERE customer_orderId = @id2;
+                DELETE FROM customer_order WHERE id = @id3;
             ";
             cmd.Parameters.AddWithValue("id", id);
+            cmd.Parameters.AddWithValue("id2", id);
+            cmd.Parameters.AddWithValue("id3", id);
             cmd.ExecuteNonQuery();
             conn.Close();
         }

@@ -7,10 +7,7 @@
 <h2>Create Order</h2>
 
 <form asp-action="Create" method="post">
-    <div class="form-group">
-        <label asp-for="UserId" class="control-label"></label>
-        <select asp-for="UserId" class="form-control" asp-items="ViewBag.Users"></select>
-    </div>
+    <input asp-for="UserId" class="form-control" asp-items="@Model.UserId" type="hidden"/>
     <div class="form-group">
         <label asp-for="OrderTypeId" class="control-label"></label>
         <select asp-for="OrderTypeId" class="form-control" asp-items="ViewBag.OrderTypes" id="orderTypeSelect"></select>
@@ -33,7 +30,7 @@
             }
         </div>
     </div>
-    <div class="form-group" id="tablesSection" style="display: none;">
+    <div class="form-group" id="tablesSection">
         <label>Available Tables</label>
         <div>
             @foreach (var table in ViewBag.Tables)
@@ -61,11 +58,12 @@
         $(document).ready(function () {
             $('#orderTypeSelect').change(function () {
                 var selectedOrderType = $(this).val();
-                var dineInOrderType = "1";
-                if (selectedOrderType == dineInOrderType) {
-                    $('#tablesSection').show();
-                } else {
+                var dineInOrderType = "0";
+                console.log(selectedOrderType);
+                if (selectedOrderType != dineInOrderType) {
                     $('#tablesSection').hide();
+                } else {
+                    $('#tablesSection').show();
                 }
             });
 
