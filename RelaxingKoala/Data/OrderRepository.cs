@@ -362,7 +362,7 @@ namespace RelaxingKoala.Data
             return (OrderType)Enum.Parse(typeof(OrderType), reader.GetString(1));
         }
 
-        private IOrder GetOrderObject(MySqlDataReader reader)
+        public IOrder GetOrderObject(MySqlDataReader reader)
         {
             var type = reader.GetInt32("orderTypeId");
             switch (type)
