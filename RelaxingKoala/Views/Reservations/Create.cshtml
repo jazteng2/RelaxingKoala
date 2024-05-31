@@ -23,7 +23,7 @@
         <label asp-for="NumberOfPeople" class="control-label"></label>
         <input asp-for="NumberOfPeople" class="form-control" />
     </div>
-        <input asp-for="UserId" class="form-control" type="hidden" value="@ViewBag.UserId"/>
+        <input asp-for="UserId" class="form-control" type="hidden" value="@Model.UserId"/>
     <div class="form-group">
         <label asp-for="Tables" class="control-label"></label>
         <select asp-for="Tables" class="form-control" multiple="multiple">

@@ -20,15 +20,6 @@ namespace RelaxingKoala.Controllers
             _reservationRepository = new ReservationRepository(dataSource);
             _tableRepository = new TableRepository(dataSource); 
         }
-        public IActionResult MyReservations()
-        {
-            // Get user id
-            string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null) return RedirectToAction("Login", "Account");
-
-            var reservations = _reservationRepository.GetByUserId(new Guid(userId));
-            return View(reservations);
-        }
 
         public IActionResult Index()
         {
@@ -40,14 +31,13 @@ namespace RelaxingKoala.Controllers
             return View(reservations);
         }
 
-        public IActionResult Create(Guid? id)
+        public IActionResult Create()
         {
-            if (id.HasValue)
-            {
-                ViewBag.Id = id.Value;
-            }
+            string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return RedirectToAction("Login", "Account");
             ViewBag.Tables = _reservationRepository.GetAvailableTables();
-            return View();
+            return View(new Reservation() { UserId = new Guid(userId) });
+
         }
 
         [HttpPost]
@@ -108,16 +98,10 @@ namespace RelaxingKoala.Controllers
 
         public IActionResult Delete(Guid? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return BadRequest();
 
             var reservation = _reservationRepository.GetById(id.Value);
-            if (reservation == null)
-            {
-                return NotFound();
-            }
+            if (reservation == null) return NotFound();
 
             return View(reservation);
         }
@@ -127,7 +111,7 @@ namespace RelaxingKoala.Controllers
         public IActionResult DeleteConfirmed(Guid id)
         {
             _reservationRepository.Delete(id);
-            return RedirectToAction(nameof(MyReservations));
+            return RedirectToAction(nameof(Index));
         }
 
         private bool ReservationExists(Guid id)

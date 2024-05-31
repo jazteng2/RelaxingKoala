@@ -29,7 +29,8 @@
                     <td>@reservation.EndTime</td>
                     <td>@reservation.NumberOfPeople</td>
                     <td>
-                        <a href="@Url.Action("Delete", new { id = reservation.Id })">Delete</a>
+                        <a asp-action="Edit" asp-route-id="@reservation.Id" class="btn btn-primary">Edit</a>
+                        <a asp-action="Delete" asp-route-id="@reservation.Id" class="btn btn-danger">Delete</a>
                     </td>
                 </tr>
             }

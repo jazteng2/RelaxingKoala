@@ -17,19 +17,14 @@
         <p>Our restaurant offers a wide variety of delicious dishes, comfortable seating, and excellent customer service. Explore our menu, make reservations, and enjoy special offers!</p>
     }
 
-    @* Navigation Bar *@
+    @* Popular operations *@
     @if (Model != null)
     {
-        if (Model.Role == UserRole.Customer)
+        if (Model.Role != UserRole.Driver)
         {
             <a class="btn btn-primary btn-lg" asp-area="" asp-controller="Reservations" asp-route-id="@Model.Id" asp-action="Create">Make a Reservation</a>
-            <a class="btn btn-secondary btn-lg" asp-area="" asp-controller="Menu" asp-action="Index">View Menu</a>
-            <a class="btn btn-secondary btn-lg" asp-area="" asp-route-id="@Model.Id" asp-controller="" asp-action="">Make an Order</a>
-        }
-        if (Model.Role == UserRole.Staff || Model.Role == UserRole.Admin)
-        {
-            <a class="btn btn-primary btn-lg" asp-area="" asp-controller="Reservations" asp-action="Create">Make a Reservation</a>
             <a class="btn btn-secondary btn-lg" asp-area="" asp-controller="" asp-action="">Make an Order</a>
+            <a class="btn btn-secondary btn-lg" asp-area="" asp-controller="Menu" asp-action="Index">View Menu</a>
         }
     }
 </div>
@@ -49,25 +44,36 @@
             <p>We would love to hear from you. Reach out to us for any inquiries, feedback, or reservations. You can contact us via phone, email, or visit our restaurant. <a asp-area="" asp-controller="Contact" asp-action="Index">Contact us</a></p>
         </div>
     </div>
+
+    @* Other operations *@
     <div class="row mt-4">
         <div class="col-md-12 text-center">
             @if (Model != null)
             {
-                <a class="btn btn-warning btn-lg" asp-area="" asp-controller="Reservations" asp-action="Index">Manage Reservations</a>
-                <a class="btn btn-warning btn-lg" asp-area="" asp-controller="" asp-action="">Manage Orders</a>
-
-                if (Model.Role == UserRole.Staff || Model.Role == UserRole.Admin)
-                {
-                    <a class="btn btn-warning btn-lg" asp-area="" asp-controller="Kitchen" asp-action="Index">Kitchen</a>
-                }
-                else if (Model.Role == UserRole.Admin)
-                {
-                    <a class="btn btn-warning btn-lg" asp-area="" asp-controller="Kitchen" asp-action="Index">Kitchen</a>
-                    <a class="btn btn-warning btn-lg" asp-area="" asp-controller="SalesReport" asp-action="Index">Vierw Sales</a>
-                }
-                else if (Model.Role == UserRole.Driver)
+                @* Driver *@
+                if (Model.Role == UserRole.Driver)
                 {
                     <a class="btn btn-warning btn-lg" asp-area="" asp-controller="Delivery" asp-action="Index">View Deliveries</a>
+                    <a class="btn btn-warning btn-lg" asp-area="" asp-controller="Delivery" asp-action="Index">Completed Deliveries</a>
+                }
+                else
+                {
+                    @* Customer Staff Admin *@
+                    <a class="btn btn-warning btn-lg" asp-area="" asp-controller="Reservations" asp-action="Index">Manage Reservations</a>
+                    <a class="btn btn-warning btn-lg" asp-area="" asp-controller="" asp-action="">Manage Orders</a>
+
+                    @* Staff *@
+                    if (Model.Role == UserRole.Staff || Model.Role == UserRole.Admin)
+                    {
+                        <a class="btn btn-warning btn-lg" asp-area="" asp-controller="Kitchen" asp-action="Index">Kitchen</a>
+                        <a class="btn btn-warning btn-lg" asp-area="" asp-controller="Invoice" asp-action="Index">Invoices</a>
+                    }
+
+                    @* Admin *@
+                    if (Model.Role == UserRole.Admin)
+                    {
+                        <a class="btn btn-warning btn-lg" asp-area="" asp-controller="SalesReport" asp-action="Index">View Sales</a>
+                    }
                 }
             }
         </div>
